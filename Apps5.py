@@ -275,8 +275,8 @@ with tab1:
             fig_gdp.update_traces(texttemplate='%{text:,.2f}', textposition='outside')
             fig_gdp.update_layout(
                 title_x=0.2,
-                plot_bgcolor="black",
-                paper_bgcolor="rgba(255,255,255,0.9)",
+                plot_bgcolor="rgba(255,255,255,0.9)",
+                paper_bgcolor="black",
                 uniformtext_minsize=8, uniformtext_mode='hide'
             )
             
@@ -564,4 +564,5 @@ with tab2:
             st.write(jawapan)
         else:
             st.warning("Please type a question first.")
+
 
