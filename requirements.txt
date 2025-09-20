@@ -1,6 +1,8 @@
 streamlit
+pandas
 matplotlib
 plotly
-pandas
-numpy
 Pillow
+requests
+groq
+numpy
