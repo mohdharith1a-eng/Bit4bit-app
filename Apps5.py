@@ -11,6 +11,7 @@ import requests
 import json
 import warnings
 import numpy as np
+import io
 from groq import Groq
 
 # Suppress warnings from pandas and other libraries for cleaner output
@@ -48,8 +49,6 @@ def ask_groq(query):
     
     except Exception as e:
         return f"Maaf, ralat berlaku semasa berhubung dengan chatbot: {e}"
-
-# ... (rest of the Streamlit code)
 
 # ================== BACKGROUND IMAGE + GRADIENT ==================
 def add_bg_from_local(image_file):
@@ -214,10 +213,27 @@ def get_state_names_dict():
         'W.P. KUALA LUMPUR': 'W.P. Kuala Lumpur'
     }
 
-# This function is not used in the corrected code to avoid errors with local paths in a cloud environment.
-# def get_flags_dict():
-#     flags_dict = {}
-#     return flags_dict
+def get_flags_dict():
+    base_url = "https://raw.githubusercontent.com/mohdharith1a-eng/Bit4bit-app/main/bendera/"
+    flags_dict = {
+        'JOHOR': f'{base_url}johor.png',
+        'KEDAH': f'{base_url}kedah.png',
+        'KELANTAN': f'{base_url}kelantan.png',
+        'W.P. LABUAN': f'{base_url}labuan.png',
+        'MELAKA': f'{base_url}melaka.png',
+        'NEGERI SEMBILAN': f'{base_url}n9.png',
+        'PAHANG': f'{base_url}pahang.png',
+        'PERAK': f'{base_url}perak.png',
+        'PERLIS': f'{base_url}perlis.png',
+        'PULAU PINANG': f'{base_url}penang.png',
+        'PUTRAJAYA': f'{base_url}putrajaya.png',
+        'SABAH': f'{base_url}sabah.png',
+        'SARAWAK': f'{base_url}sarawak.png',
+        'SELANGOR': f'{base_url}selangor.png',
+        'TERENGGANU': f'{base_url}terengganu.png',
+        'W.P. KUALA LUMPUR': f'{base_url}kuala_lumpur.png'
+    }
+    return flags_dict
 
 # ================== STREAMLIT APP LAYOUT ==================
 st.title("📊 BRIDGING THE GDP-GPI GAP: MALAYSIAN ECONOMIC DASHBOARD")
@@ -225,14 +241,12 @@ st.title("📊 BRIDGING THE GDP-GPI GAP: MALAYSIAN ECONOMIC DASHBOARD")
 # Load data
 df_gdp, df_unemp, df_pop, df_wellbeing, combined_df = load_all_data()
 state_names_dict = get_state_names_dict()
-# flags_dict = get_flags_dict() # Flags are not used to avoid local path errors
+flags_dict = get_flags_dict()
 
 # Add background image for App Page
 add_bg_from_local("background.png")
 
-# --- CORRECTED: Place the tab creation here so the variables are defined ---
 tab1, tab2 = st.tabs(["📈 Infographic Dashboard for RAW data DOSM", "🔍 Comparisons dataset & Solutions"])
-# --- END OF CORRECTION ---
 
 # --- TAB 1: Infographics ---
 with tab1:
@@ -266,6 +280,19 @@ with tab1:
             ax.set_xticks(range(len(states)))
             ax.set_xticklabels(states, rotation=90, fontsize=8)
             
+            # --- KOD BARU UNTUK BENDERA ---
+            for i, state in enumerate(df_latest_year_sorted['state']):
+                flag_url = flags_dict.get(state)
+                if flag_url:
+                    try:
+                        response = requests.get(flag_url)
+                        img = Image.open(io.BytesIO(response.content))
+                        imagebox = OffsetImage(img, zoom=0.1) # Saiz bendera
+                        ab = AnnotationBbox(imagebox, (i, gdp_values.iloc[i]), frameon=False, pad=0.1, box_alignment=(0.5, -0.6))
+                        ax.add_artist(ab)
+                    except Exception as e:
+                        print(f"Error loading flag for {state}: {e}")
+                        
             for i, val in enumerate(gdp_values):
                 ax.text(i, val, f"{val:,.2f}", ha='center', va='bottom', fontsize=6, color='black')
             
@@ -328,13 +355,13 @@ with tab1:
             
                 df_sorted = df_wellbeing.sort_values(by='economic_wellbeing', ascending=False)
                 bar_chart = px.bar(df_sorted, x='economic_wellbeing', y='state', orientation='h',
-                                color='economic_wellbeing', color_continuous_scale='Viridis',
-                                labels={'economic_wellbeing': 'Index Score', 'state': 'State'},
-                                text='economic_wellbeing', title="ECONOMIC WELLBEING INDEX BY STATE")
+                                 color='economic_wellbeing', color_continuous_scale='Viridis',
+                                 labels={'economic_wellbeing': 'Index Score', 'state': 'State'},
+                                 text='economic_wellbeing', title="ECONOMIC WELLBEING INDEX BY STATE")
                 bar_chart.update_traces(texttemplate='%{text:.2f}', textposition='outside')
                 bar_chart.update_layout(uniformtext_minsize=2, uniformtext_mode='hide', title_x=0.2,
-                                        margin=dict(l=150, r=100, t=50, b=20),
-                                        xaxis=dict(range=[0, df_wellbeing['economic_wellbeing'].max() * 1.3]))
+                                         margin=dict(l=150, r=100, t=50, b=20),
+                                         xaxis=dict(range=[0, df_wellbeing['economic_wellbeing'].max() * 1.3]))
                 st.plotly_chart(bar_chart, use_container_width=True)
 
                 st.markdown("""
@@ -360,20 +387,20 @@ with tab1:
             
             fig_lollipop = go.Figure()
             fig_lollipop.add_trace(go.Scatter(x=df_total_unemployed['state_full_name'], y=df_total_unemployed[unemployed_column_name],
-                                            mode='lines', line=dict(color='rgba(0,176,246,0.5)', width=3), hoverinfo='skip', showlegend=False))
+                                             mode='lines', line=dict(color='rgba(0,176,246,0.5)', width=3), hoverinfo='skip', showlegend=False))
             fig_lollipop.add_trace(go.Scatter(x=df_total_unemployed['state_full_name'], y=df_total_unemployed[unemployed_column_name],
-                                            mode='markers+text', marker=dict(size=15, color=df_total_unemployed[unemployed_column_name],
-                                            colorscale='Viridis', showscale=False, line=dict(color='white', width=3)),
-                                            text=df_total_unemployed[unemployed_column_name].apply(lambda x: f"{x:,.0f}"),
-                                            textposition='top center', textfont=dict(color='#2c3e50', size=12, family="Arial, sans-serif"),
-                                            hovertemplate="<b>%{x}</b><br>Total Unemployed: %{y:,.0f}<extra></extra>", showlegend=False))
+                                             mode='markers+text', marker=dict(size=15, color=df_total_unemployed[unemployed_column_name],
+                                             colorscale='Viridis', showscale=False, line=dict(color='white', width=3)),
+                                             text=df_total_unemployed[unemployed_column_name].apply(lambda x: f"{x:,.0f}"),
+                                             textposition='top center', textfont=dict(color='#2c3e50', size=12, family="Arial, sans-serif"),
+                                             hovertemplate="<b>%{x}</b><br>Total Unemployed: %{y:,.0f}<extra></extra>", showlegend=False))
             fig_lollipop.update_layout(title=dict(text="TOTAL UNEMPLOYED WORKFORCE", font=dict(size=14, color='black', family="Arial, sans-serif"), x=0.3),
-                                    xaxis=dict(title=dict(text='State', font=dict(size=14, color='#2c3e50')), tickangle=90, tickfont=dict(size=12, color='black'),
-                                                gridcolor='rgba(0,0,0,0.1)', linecolor='#2c3e50'),
-                                    yaxis=dict(title=dict(text='Total Unemployed (in Thousands)', font=dict(size=14, color='#2c3e50')),
-                                                tickfont=dict(size=12, color='#2c3e50'), gridcolor='rgba(0,0,0,0.1)', linecolor='#2c3e50'),
-                                    plot_bgcolor="rgba(255,255,255,0.9)", paper_bgcolor="rgba(255,255,255,0.9)",
-                                    height=450, font=dict(family="Arial, sans-serif", size=12), margin=dict(l=2, r=40, t=80, b=10))
+                                     xaxis=dict(title=dict(text='State', font=dict(size=14, color='#2c3e50')), tickangle=90, tickfont=dict(size=12, color='black'),
+                                             gridcolor='rgba(0,0,0,0.1)', linecolor='#2c3e50'),
+                                     yaxis=dict(title=dict(text='Total Unemployed (in Thousands)', font=dict(size=14, color='#2c3e50')),
+                                             tickfont=dict(size=12, color='#2c3e50'), gridcolor='rgba(0,0,0,0.1)', linecolor='#2c3e50'),
+                                     plot_bgcolor="rgba(255,255,255,0.9)", paper_bgcolor="rgba(255,255,255,0.9)",
+                                     height=450, font=dict(family="Arial, sans-serif", size=12), margin=dict(l=2, r=40, t=80, b=10))
             st.plotly_chart(fig_lollipop, use_container_width=True)
 
 
@@ -533,12 +560,3 @@ with tab2:
             st.write(jawapan)
         else:
             st.warning("Please enter a question first.")
-
-
-
-
-
-
-
-
-
