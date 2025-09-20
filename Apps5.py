@@ -107,9 +107,9 @@ def add_bg_from_local(image_file):
 
 # ================== PATHS & DATA LOADING ==================
 gdp_path = r"https://github.com/mohdharith1a-eng/Bit4bit-app/blob/main/datasets/gdp_state_.csv"
-unemp_path = r"C:\Users\Acer\OneDrive\Desktop\Apps3\datasets\unemployed.csv"
-pop_path = r"C:\Users\Acer\OneDrive\Desktop\Apps3\datasets\population_state.csv"
-wellbeing_path = r"C:\Users\Acer\OneDrive\Desktop\Apps3\datasets\economic_wellbeing.csv"
+unemp_path = r"https://github.com/mohdharith1a-eng/Bit4bit-app/blob/main/datasets/unemployed.csv"
+pop_path = r"https://github.com/mohdharith1a-eng/Bit4bit-app/blob/main/datasets/population_state.csv"
+wellbeing_path = r"https://github.com/mohdharith1a-eng/Bit4bit-app/blob/main/datasets/economic_wellbeing.csv"
 flag_folder_path = r"C:\Users\Acer\OneDrive\Desktop\Apps3\bendera"
 
 def clean_data(df, date_cols=None, numeric_cols=None, fillna_val=0, upper_state=True):
@@ -602,3 +602,4 @@ with tab2:
         else:
 
             st.warning("Please enter a question first.")
+
