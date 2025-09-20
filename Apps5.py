@@ -216,7 +216,7 @@ def get_state_names_dict():
 def get_flags_dict():
     # --- KOD UNTUK MEMBACA FAIL TEMPATAN ---
     flags_dict = {
-        'JOHOR': 'bendera/johor.png',
+        'JOHOR': 'bendera/JOHOR.png',
         'KEDAH': 'bendera/kedah.png',
         'KELANTAN': 'bendera/kelantan.png',
         'W.P. LABUAN': 'bendera/labuan.png',
@@ -559,3 +559,4 @@ with tab2:
             st.write(jawapan)
         else:
             st.warning("Please enter a question first.")
+
