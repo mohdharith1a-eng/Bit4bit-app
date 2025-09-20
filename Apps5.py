@@ -14,21 +14,21 @@ import numpy as np
 import io
 from groq import Groq
 
-# Suppress warnings from pandas and other libraries for cleaner output
+# Suppress warnings for a cleaner display
 warnings.filterwarnings('ignore')
 px.defaults.template = "plotly_white"
 
-# Set page configuration for a wider layout
+# Set a wide page layout
 st.set_page_config(layout="wide")
 
 
-# Placeholder for the chatbot function, as it was not defined in the provided code
+# Chatbot function to get answers from the Groq API
 def ask_groq(query):
     try:
-        # Dapatkan kunci API dari secrets Streamlit
+        # Get the API key from Streamlit secrets
         client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
-        # Hantar soalan pengguna ke API Groq
+        # Send the user's question to the Groq API
         chat_completion = client.chat.completions.create(
             messages=[
                 {
@@ -40,17 +40,15 @@ def ask_groq(query):
                     "content": query,
                 }
             ],
-            # --- GANTIKAN DENGAN NAMA MODEL YANG BAHARU ---
             model="llama-3.1-8b-instant",
-            # ---------------------------------------------
         )
 
         return chat_completion.choices[0].message.content
     
     except Exception as e:
-        return f"Maaf, ralat berlaku semasa berhubung dengan chatbot: {e}"
+        return f"Sorry, an error occurred when connecting to the chatbot: {e}"
 
-# ================== BACKGROUND IMAGE + GRADIENT ==================
+# Add a background image with a gradient overlay
 def add_bg_from_local(image_file):
     """Adds a local background image with a gradient overlay to the app."""
     try:
@@ -68,7 +66,7 @@ def add_bg_from_local(image_file):
             background-attachment: fixed;
         }}
         
-        /* Improve text readability and chart appearance */
+        /* Improve text and chart appearance */
         .main .block-container {{
             padding-top: 2rem;
             padding-bottom: 2rem;
@@ -94,7 +92,6 @@ def add_bg_from_local(image_file):
             border: 2px solid rgba(255, 255, 255, 0.3);
         }}
         
-        /* Add specific style to make text within the translucent box dark */
         .translucent-box {{
             background-color: rgba(255, 255, 255, 0.85);
             padding: 15px;
@@ -114,7 +111,7 @@ def add_bg_from_local(image_file):
         st.error(f"Background image '{image_file}' not found.")
 
 
-# ================== PATHS & DATA LOADING ==================
+# --- DATA PATHS AND LOADING ---
 gdp_path = r"https://raw.githubusercontent.com/mohdharith1a-eng/Bit4bit-app/main/datasets/gdp_state_.csv"
 unemp_path = r"https://raw.githubusercontent.com/mohdharith1a-eng/Bit4bit-app/main/datasets/unemployed.csv"
 pop_path = r"https://raw.githubusercontent.com/mohdharith1a-eng/Bit4bit-app/main/datasets/population_state.csv"
@@ -132,7 +129,7 @@ def load_csv_safe(path, name=""):
         return df
     except Exception as e:
         print(f"❌ Error loading {name} ({path}): {e}")
-        return pd.DataFrame() # return empty df if failed
+        return pd.DataFrame()
 
 def clean_data(df, date_cols=None, numeric_cols=None, fillna_val=0, upper_state=True):
     df = df.copy()
@@ -202,6 +199,7 @@ def load_all_data():
 
     return gdp, lfs, population, economic_wellbeing, combined_df
 
+# Helper function to map state codes to full names
 def get_state_names_dict():
     return {
         'JOHOR': 'Johor', 'KEDAH': 'Kedah', 'KELANTAN': 'Kelantan',
@@ -213,6 +211,7 @@ def get_state_names_dict():
         'W.P. KUALA LUMPUR': 'W.P. Kuala Lumpur'
     }
 
+# Helper function to get flag image paths
 def get_flags_dict():
     flags_dict = {
         'JOHOR': 'bendera/JOHOR.png',
@@ -235,27 +234,28 @@ def get_flags_dict():
     return flags_dict
 
 # ================== STREAMLIT APP LAYOUT ==================
-st.title("📊 BRIDGING THE GDP-GPI GAP: MALAYSIAN ECONOMIC DASHBOARD")
+
+st.title("📊 Bridging the GDP-GPI Gap: Malaysian Economic Dashboard")
 
 # Load data
 df_gdp, df_unemp, df_pop, df_wellbeing, combined_df = load_all_data()
 state_names_dict = get_state_names_dict()
 flags_dict = get_flags_dict()
 
-# Add background image for App Page
+# Add background image
 add_bg_from_local("background.png")
 
-tab1, tab2 = st.tabs(["📈 Infographic Dashboard for RAW data DOSM", "🔍 Comparisons dataset & Solutions"])
+tab1, tab2 = st.tabs(["📈 Infographic Dashboard", "🔍 Data Comparisons & Solutions"])
 
 # --- TAB 1: Infographics ---
 with tab1:
     if df_gdp is not None and df_unemp is not None and df_wellbeing is not None and df_pop is not None:
         
-        # === FIRST ROW: GDP CHART & POPULATION CHART ===
+        # === First Row: GDP and Population Charts ===
         col_gdp, col_pop = st.columns(2)
 
         with col_gdp:
-            # === GDP CHART (Plotly) ===
+            # === GDP CHART ===
             most_recent_year = df_gdp['year'].max()
             df_latest_year = df_gdp[df_gdp['year'] == most_recent_year].copy()
             df_latest_year['state'] = df_latest_year['state'].str.upper().replace({'SUPRA': 'PUTRAJAYA'})
@@ -266,7 +266,7 @@ with tab1:
                 df_latest_year,
                 x='state_full_name',
                 y='gdp_total',
-                title=f'GROSS DOMESTIC PRODUCT IN {most_recent_year}',
+                title=f'Gross Domestic Product (GDP) in {most_recent_year}',
                 labels={'gdp_total': 'GDP (RM Million)', 'state_full_name': 'State'},
                 color='gdp_total',
                 color_continuous_scale=px.colors.sequential.Viridis,
@@ -299,7 +299,7 @@ with tab1:
                                 xanchor="center",
                                 yanchor="bottom",
                                 x=row['state_full_name'],
-                                y=1.05, # Position the flag slightly above the plot area
+                                y=1.05,
                                 sizex=0.1,
                                 sizey=0.1,
                                 layer="above"
@@ -330,7 +330,7 @@ with tab1:
                 marker=dict(line=dict(color='#FFFFFF', width=1))
             )
             fig_pop.update_layout(
-                title=dict(text="POPULATION DISTRIBUTION BY STATE (IN THOUSANDS)",
+                title=dict(text="Population Distribution by State (in thousands)",
                     font=dict(size=14, color='black', family="Arial, sans-serif"),
                     x=0.2
                 ),
@@ -347,7 +347,7 @@ with tab1:
             st.plotly_chart(fig_pop, use_container_width=True)
 
 
-        # --- SECOND ROW: WELLBEING & UNEMPLOYMENT ---
+        # --- Second Row: Wellbeing and Unemployment ---
         col_wellbeing, col_unemp = st.columns(2)
 
         with col_wellbeing:
@@ -365,7 +365,7 @@ with tab1:
                 bar_chart = px.bar(df_sorted, x='economic_wellbeing', y='state', orientation='h',
                                     color='economic_wellbeing', color_continuous_scale='Viridis',
                                     labels={'economic_wellbeing': 'Index Score', 'state': 'State'},
-                                    text='economic_wellbeing', title="ECONOMIC WELLBEING INDEX BY STATE")
+                                    text='economic_wellbeing', title="Economic Wellbeing Index by State")
                 bar_chart.update_traces(texttemplate='%{text:.2f}', textposition='outside')
                 bar_chart.update_layout(uniformtext_minsize=2, uniformtext_mode='hide', title_x=0.2,
                                         margin=dict(l=150, r=100, t=50, b=20),
@@ -382,9 +382,9 @@ with tab1:
 
                 metrics_col1, metrics_col2 = st.columns(2)
                 with metrics_col1:
-                    st.metric(label="State with the Highest Index", value=f"{max_state_info['state']}", delta=f"{max_state_info['economic_wellbeing']:.2f}")
+                    st.metric(label="Highest Index", value=f"{max_state_info['state']}", delta=f"{max_state_info['economic_wellbeing']:.2f}")
                 with metrics_col2:
-                    st.metric(label="State with the Lowest Index", value=f"{min_state_info['state']}", delta=f"{min_state_info['economic_wellbeing']:.2f}", delta_color="inverse")
+                    st.metric(label="Lowest Index", value=f"{min_state_info['state']}", delta=f"{min_state_info['economic_wellbeing']:.2f}", delta_color="inverse")
             
         with col_unemp:
             # === UNEMPLOYMENT CHART ===
@@ -402,24 +402,24 @@ with tab1:
                                                 text=df_total_unemployed[unemployed_column_name].apply(lambda x: f"{x:,.0f}"),
                                                 textposition='top center', textfont=dict(color='#2c3e50', size=12, family="Arial, sans-serif"),
                                                 hovertemplate="<b>%{x}</b><br>Total Unemployed: %{y:,.0f}<extra></extra>", showlegend=False))
-            fig_lollipop.update_layout(title=dict(text="TOTAL UNEMPLOYED WORKFORCE", font=dict(size=14, color='black', family="Arial, sans-serif"), x=0.3),
+            fig_lollipop.update_layout(title=dict(text="Total Unemployed Workforce", font=dict(size=14, color='black', family="Arial, sans-serif"), x=0.3),
                                         xaxis=dict(title=dict(text='State', font=dict(size=14, color='#2c3e50')), tickangle=90, tickfont=dict(size=12, color='black'),
                                             gridcolor='rgba(0,0,0,0.1)', linecolor='#2c3e50'),
-                                        yaxis=dict(title=dict(text='Total Unemployed (in Thousands)', font=dict(size=14, color='#2c3e50')),
+                                        yaxis=dict(title=dict(text='Total Unemployed (in thousands)', font=dict(size=14, color='#2c3e50')),
                                             tickfont=dict(size=12, color='#2c3e50'), gridcolor='rgba(0,0,0,0.1)', linecolor='#2c3e50'),
                                         plot_bgcolor="rgba(255,255,255,0.9)", paper_bgcolor="rgba(255,255,255,0.9)",
                                         height=450, font=dict(family="Arial, sans-serif", size=12), margin=dict(l=2, r=40, t=80, b=10))
             st.plotly_chart(fig_lollipop, use_container_width=True)
 
 
-# --- TAB 2: ECONOMIC COMPARISONS AND CHATBOT ---
+# --- TAB 2: Economic Comparisons and Chatbot ---
 with tab2:
     df_snapshot = combined_df[combined_df['year'] == 2022].copy()
     df_snapshot = df_snapshot.fillna(0)
     df_snapshot = df_snapshot.sort_values(by='state')
     df_snapshot['state_full_name'] = df_snapshot['state'].apply(lambda s: state_names_dict.get(s, s))
 
-    comparison = st.selectbox("Select Comparison:", [
+    comparison = st.selectbox("Select a Comparison:", [
         "Total GDP vs. Population",
         "Total GDP vs. Unemployment Rate",
         "GDP per Capita vs. Unemployment Rate"
@@ -430,20 +430,20 @@ with tab2:
     fig = go.Figure()
 
     if comparison == "Total GDP vs. Population":
-        findings = "Note the relationship between population and GDP. States with larger populations typically contribute to higher GDP."
-        suggestions = "This shows great potential for these states to drive the nation's economic growth."
+        findings = "States with larger populations often have a higher GDP."
+        suggestions = "These states have a strong potential to drive national economic growth."
         fig.add_trace(go.Bar(
             x=df_snapshot['state_full_name'],
             y=df_snapshot['gdp_total'],
             name='Total GDP (RM Million)',
-            marker_color='#4C72B0',  # A professional, calming blue
+            marker_color='#4C72B0',
             offsetgroup=0
         ))
         fig.add_trace(go.Bar(
             x=df_snapshot['state_full_name'],
             y=df_snapshot['population'],
             name='Population',
-            marker_color='#E46E2B',  # A contrasting, warm orange/red
+            marker_color='#E46E2B',
             offsetgroup=1,
             yaxis='y2'
         ))
@@ -465,28 +465,26 @@ with tab2:
         )
             
     elif comparison == "Total GDP vs. Unemployment Rate":
-        findings = "This analysis shows whether a high GDP contributes to a lower unemployment rate."
-        suggestions = "While the trend is clear, other factors such as industry type and labor market need to be considered."
+        findings = "This chart shows how high GDP relates to the unemployment rate."
+        suggestions = "Other factors like the types of industries and the job market need to be considered for a full picture."
 
-        # Line scatter chart for Total GDP
         fig.add_trace(go.Scatter(
             x=df_snapshot['state_full_name'],
             y=df_snapshot['gdp_total'],
             name='Total GDP (RM Million)',
             mode='lines+markers',
-            line=dict(color='#781fb4', width=4), # A deep purple line
+            line=dict(color='#781fb4', width=4),
             marker=dict(color='#781fb4', size=8),
             yaxis='y1'
         ))
 
-        # Line scatter chart for Unemployment Rate
         fig.add_trace(go.Scatter(
             x=df_snapshot['state_full_name'],
             y=df_snapshot['unemployment_rate'],
             name='Unemployment Rate (%)',
             mode='lines+markers',
             yaxis='y2',
-            line=dict(color='#035720', width=4), # A dark green line
+            line=dict(color='#035720', width=4),
             marker=dict(color='#035720', size=8)
         ))
 
@@ -506,28 +504,26 @@ with tab2:
             )
         )
     elif comparison == "GDP per Capita vs. Unemployment Rate":
-        findings = "This comparison provides a more detailed picture of individual wellbeing and its connection to job opportunities."
-        suggestions = "Continuing to invest in high-tech and TVET sectors is important to maintain this trend."
+        findings = "This comparison gives a better look at individual well-being and its link to job opportunities."
+        suggestions = "Investing in high-tech and TVET sectors is key to keeping this positive trend going."
 
-        # Line scatter chart for GDP per Capita
         fig.add_trace(go.Scatter(
             x=df_snapshot['state_full_name'],
             y=df_snapshot['gdp_per_capita'],
             name='GDP per Capita (RM)',
             mode='lines+markers',
-            line=dict(color='#33a02c', width=4), # A clear green line
+            line=dict(color='#33a02c', width=4),
             marker=dict(color='#33a02c', size=8),
             yaxis='y1'
         ))
 
-        # Line scatter chart for Unemployment Rate
         fig.add_trace(go.Scatter(
             x=df_snapshot['state_full_name'],
             y=df_snapshot['unemployment_rate'],
             name='Unemployment Rate (%)',
             mode='lines+markers',
             yaxis='y2',
-            line=dict(color='#e31a1c', width=4), # A contrasting red line
+            line=dict(color='#e31a1c', width=4),
             marker=dict(color='#e31a1c', size=8)
         ))
 
@@ -546,7 +542,7 @@ with tab2:
                 side="right"
             )
         )
-    # Common layout updates for all comparison charts
+    # Common updates for all comparison charts
     fig.update_layout(
         legend=dict(x=0, y=1.1, orientation="h"),
         plot_bgcolor="rgba(255,255,255,0.9)", paper_bgcolor="rgba(255,255,255,0.9)",
@@ -554,17 +550,17 @@ with tab2:
         xaxis=dict(tickangle=-45, tickfont=dict(size=11, color='black'))
     )
 
-    st.markdown(f'<div class="translucent-box"><h4>📌 Findings</h4><p>{findings}</p></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="translucent-box"><h4>📌 **Key Findings**</h4><p>{findings}</p></div>', unsafe_allow_html=True)
     st.plotly_chart(fig, use_container_width=True)
-    st.markdown(f'<div class="translucent-box"><h4>💡 Suggestions</h4><p>{suggestions}</p></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="translucent-box"><h4>💡 **Recommendations**</h4><p>{suggestions}</p></div>', unsafe_allow_html=True)
     
     st.subheader("🤖 Bit4Bit Chatbot")
-    user_q = st.text_input("Ask a question (e.g., Johor's GDP trend 2022–2023)")
-    if st.button("Submit Question"):
+    user_q = st.text_input("Ask a question about the data, like: What was Johor's GDP trend from 2022 to 2023?")
+    if st.button("Get Answer"):
         if user_q.strip():
             with st.spinner("Generating answer..."):
                 jawapan = ask_groq(user_q)
-            st.write("*Chartbot Answer:*")
+            st.write("**Chatbot Answer:**")
             st.write(jawapan)
         else:
-            st.warning("Please enter a question first.")
+            st.warning("Please type a question first.")
