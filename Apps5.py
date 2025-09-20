@@ -216,21 +216,21 @@ def get_state_names_dict():
 def get_flags_dict():
     flags_dict = {
         'JOHOR': 'bendera/JOHOR.png',
-        'KEDAH': 'bendera/kedah.png',
-        'KELANTAN': 'bendera/kelantan.png',
-        'W.P. LABUAN': 'bendera/labuan.png',
-        'MELAKA': 'bendera/melaka.png',
-        'NEGERI SEMBILAN': 'bendera/n9.png',
-        'PAHANG': 'bendera/pahang.png',
-        'PERAK': 'bendera/perak.png',
-        'PERLIS': 'bendera/perlis.png',
-        'PULAU PINANG': 'bendera/penang.png',
-        'PUTRAJAYA': 'bendera/putrajaya.png',
-        'SABAH': 'bendera/sabah.png',
-        'SARAWAK': 'bendera/sarawak.png',
-        'SELANGOR': 'bendera/selangor.png',
-        'TERENGGANU': 'bendera/terengganu.png',
-        'W.P. KUALA LUMPUR': 'bendera/kuala_lumpur.png'
+        'KEDAH': 'bendera/KEDAH.png',
+        'KELANTAN': 'bendera/KELANTAN.png',
+        'W.P. LABUAN': 'bendera/W.P. LABUAN.png',
+        'MELAKA': 'bendera/MELAKA.png',
+        'NEGERI SEMBILAN': 'bendera/NEGERI SEMBILAN.png',
+        'PAHANG': 'bendera/PAHANG.png',
+        'PERAK': 'bendera/PERAK.png',
+        'PERLIS': 'bendera/PERLIS.png',
+        'PULAU PINANG': 'bendera/PULAU PINANG.png',
+        'PUTRAJAYA': 'bendera/PUTRAJAYA.png',
+        'SABAH': 'bendera/SABAH.png',
+        'SARAWAK': 'bendera/SARAWAK.png',
+        'SELANGOR': 'bendera/SELANGOR.png',
+        'TERENGGANU': 'bendera/TERENGGANU.png',
+        'W.P. KUALA LUMPUR': 'bendera/W.P. KUALA LUMPUR.png'
     }
     return flags_dict
 
@@ -438,4 +438,5 @@ with tab1:
                                      plot_bgcolor="rgba(255,255,255,0.9)", paper_bgcolor="rgba(255,255,255,0.9)",
                                      height=450, font=dict(family="Arial, sans-serif", size=12), margin=dict(l=2, r=40, t=80, b=10))
             st.plotly_chart(fig_lollipop, use_container_width=True)
+
 
