@@ -216,22 +216,22 @@ def get_state_names_dict():
 def get_flags_dict():
     # --- KOD UNTUK MEMBACA FAIL TEMPATAN ---
     flags_dict = {
-        'JOHOR': 'bendera/johor.png',
-        'KEDAH': 'bendera/kedah.png',
-        'KELANTAN': 'bendera/kelantan.png',
-        'W.P. LABUAN': 'bendera/labuan.png',
-        'MELAKA': 'bendera/melaka.png',
-        'NEGERI SEMBILAN': 'bendera/n9.png',
-        'PAHANG': 'bendera/pahang.png',
-        'PERAK': 'bendera/perak.png',
-        'PERLIS': 'bendera/perlis.png',
-        'PULAU PINANG': 'bendera/penang.png',
-        'PUTRAJAYA': 'bendera/putrajaya.png',
-        'SABAH': 'bendera/sabah.png',
-        'SARAWAK': 'bendera/sarawak.png',
-        'SELANGOR': 'bendera/selangor.png',
-        'TERENGGANU': 'bendera/terengganu.png',
-        'W.P. KUALA LUMPUR': 'bendera/kuala_lumpur.png'
+        'JOHOR': 'bendera/JOHOR.png',
+        'KEDAH': 'bendera/KEDAH.png',
+        'KELANTAN': 'bendera/KELANTAN.png',
+        'W.P. LABUAN': 'bendera/W.P. LABUAN.png',
+        'MELAKA': 'bendera/MELAKA.png',
+        'NEGERI SEMBILAN': 'bendera/NEGERI SEMBILAN.png',
+        'PAHANG': 'bendera/PAHANG.png',
+        'PERAK': 'bendera/PERAK.png',
+        'PERLIS': 'bendera/PERLIS.png',
+        'PULAU PINANG': 'bendera/PULAU PINANG.png',
+        'PUTRAJAYA': 'bendera/PUTRAJAYA.png',
+        'SABAH': 'bendera/SABAH.png',
+        'SARAWAK': 'bendera/SARAWAK.png',
+        'SELANGOR': 'bendera/SELANGOR.png',
+        'TERENGGANU': 'bendera/TERENGGANU.png',
+        'W.P. KUALA LUMPUR': 'bendera/W.P. KUALA LUMPUR.png'
     }
     return flags_dict
 
@@ -559,3 +559,4 @@ with tab2:
             st.write(jawapan)
         else:
             st.warning("Please enter a question first.")
+
