@@ -261,9 +261,13 @@ with tab1:
             df_latest_year['state'] = df_latest_year['state'].str.upper().replace({'SUPRA': 'PUTRAJAYA'})
             df_latest_year = df_latest_year.sort_values(by='gdp_total', ascending=False)
             
-            fig, ax = plt.subplots(figsize=(10, 6.5))
-            fig.subplots_adjust(bottom=0.2)
-            
+            # --- KOD TELAH DIKEMASKINI DI SINI ---
+            # Buang latar belakang plot supaya kelihatan seperti di luar kotak
+            fig, ax = plt.subplots(figsize=(10, 6.5), facecolor='none') 
+            fig.subplots_adjust(bottom=0.25)
+            ax.set_facecolor('none')
+            # ------------------------------------
+
             df_latest_year_sorted = df_latest_year.sort_values(by='gdp_total', ascending=False)
             states = df_latest_year_sorted['state'].apply(lambda x: state_names_dict.get(x, x))
             gdp_values = df_latest_year_sorted['gdp_total']
@@ -279,27 +283,30 @@ with tab1:
             ax.set_xticks(range(len(states)))
             ax.set_xticklabels(states, rotation=90, fontsize=8)
             
-            # --- KOD BARU UNTUK BENDERA ---
             for i, state in enumerate(df_latest_year_sorted['state']):
                 flag_path = flags_dict.get(state)
                 if flag_path and os.path.exists(flag_path):
                     try:
                         img = Image.open(flag_path)
                         imagebox = OffsetImage(img, zoom=0.1)
-                        # Letak bendera di bawah bar
-                        ab = AnnotationBbox(imagebox, (i, -120000), frameon=False, pad=0.1, box_alignment=(0.5, 0.0))
+                        # Letak bendera di bawah bar dengan kedudukan baru
+                        ab = AnnotationBbox(imagebox, (i, -150000), frameon=False, pad=0.1, box_alignment=(0.5, 0.0))
                         ax.add_artist(ab)
                     except Exception as e:
                         print(f"Error loading flag for {state}: {e}")
             
-            # Laraskan had Y-axis supaya bendera kelihatan
+            # Laraskan had Y-axis supaya bendera dan nama negeri kelihatan
             ax.set_ylim(bottom=-200000)
             
             for i, val in enumerate(gdp_values):
                 ax.text(i, val, f"{val:,.2f}", ha='center', va='bottom', fontsize=6, color='black')
             
-            ax.set_facecolor((1.0, 1.0, 1.0, 0.5))
-            fig.set_facecolor((1.0, 1.0, 1.0, 0.8))
+            # Remove the box frame around the plot
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.spines['left'].set_visible(False)
+            ax.spines['bottom'].set_visible(False)
+            
             st.pyplot(fig)
 
         with col_pop:
