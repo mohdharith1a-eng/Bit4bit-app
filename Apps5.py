@@ -19,9 +19,9 @@ px.defaults.template = "plotly_white"
 # Set page configuration for a wider layout
 st.set_page_config(layout="wide")
 
-# ================== CHARTBOT FUNCTION ==================
+
 # ================== CHARTBOT FUNCTION (Groq API) ==================
-GROQ_API_KEY = st.secrets["GROQ_API_KEY"]  # simpan key di Streamlit Secrets
+GROQ_API_KEY = st.secrets["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"]  # simpan key di Streamlit Secrets
 
 def ask_groq(prompt):
     """Sends a prompt to the Groq API and returns the chatbot response."""
@@ -615,6 +615,7 @@ with tab2:
             st.write(jawapan)
         else:
             st.warning("Please enter a question first.")
+
 
 
 
