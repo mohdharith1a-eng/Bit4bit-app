@@ -255,56 +255,58 @@ with tab1:
         col_gdp, col_pop = st.columns(2)
 
         with col_gdp:
-            # === GDP CHART (Matplotlib) ===
+            # === GDP CHART (Plotly) ===
             most_recent_year = df_gdp['year'].max()
             df_latest_year = df_gdp[df_gdp['year'] == most_recent_year].copy()
             df_latest_year['state'] = df_latest_year['state'].str.upper().replace({'SUPRA': 'PUTRAJAYA'})
             df_latest_year = df_latest_year.sort_values(by='gdp_total', ascending=False)
+            df_latest_year['state_full_name'] = df_latest_year['state'].apply(lambda x: state_names_dict.get(x, x))
             
-            fig, ax = plt.subplots(figsize=(10, 6.5))
-            fig.subplots_adjust(bottom=0.2, top=0.9) # Menambah ruang di atas dan bawah
-
-            df_latest_year_sorted = df_latest_year.sort_values(by='gdp_total', ascending=False)
-            states = df_latest_year_sorted['state'].apply(lambda x: state_names_dict.get(x, x))
-            gdp_values = df_latest_year_sorted['gdp_total']
-
-            cmap = plt.cm.cool
-            norm = plt.Normalize(vmin=0, vmax=len(states))
-            bar_colors = [cmap(norm(i)) for i in range(len(states))]
-
-            ax.bar(states, gdp_values, color=bar_colors)
-            ax.set_ylabel('GDP (RM MILLION)')
-            ax.set_title(f'GROSS DOMESTIC PRODUCT IN {most_recent_year}')
+            fig_gdp = px.bar(
+                df_latest_year,
+                x='state_full_name',
+                y='gdp_total',
+                title=f'GROSS DOMESTIC PRODUCT IN {most_recent_year}',
+                labels={'gdp_total': 'GDP (RM Million)', 'state_full_name': 'State'},
+                color='gdp_total',
+                color_continuous_scale=px.colors.sequential.Viridis,
+                text='gdp_total'
+            )
+            fig_gdp.update_traces(texttemplate='%{text:,.2f}', textposition='outside')
+            fig_gdp.update_layout(
+                title_x=0.2,
+                plot_bgcolor="rgba(255,255,255,0.9)",
+                paper_bgcolor="rgba(255,255,255,0.9)",
+                uniformtext_minsize=8, uniformtext_mode='hide'
+            )
             
-            ax.set_xticks(range(len(states)))
-            ax.set_xticklabels(states, rotation=90, fontsize=8)
-            
-            # --- KOD BARU UNTUK BENDERA DAN TEKS ---
-            for i, state in enumerate(df_latest_year_sorted['state']):
-                flag_path = flags_dict.get(state)
+            # Add flags as annotations
+            flag_image_paths = get_flags_dict()
+            for i, row in df_latest_year.iterrows():
+                state_code = row['state']
+                flag_path = flag_image_paths.get(state_code)
                 if flag_path and os.path.exists(flag_path):
-                    try:
-                        img = Image.open(flag_path).resize((28, 23)) # Resize the image to 28x28
-                        imagebox = OffsetImage(img, zoom=1) # Keep zoom at 1 after resizing
+                    # Convert image to base64
+                    with open(flag_path, "rb") as image_file:
+                        encoded_string = base64.b64encode(image_file.read()).decode()
+                        img_url = f'data:image/png;base64,{encoded_string}'
                         
-                        # Laraskan kedudukan bendera di atas bar
-                        # Guna kedudukan y yang lebih tinggi untuk mengelakkan bertindih
-                        ab = AnnotationBbox(imagebox, (i, gdp_values.iloc[i] + 70000), 
-                                             frameon=False, pad=0.1, box_alignment=(0.5, 0.0))
-                        ax.add_artist(ab)
-                    except Exception as e:
-                        print(f"Error loading flag for {state}: {e}")
+                        fig_gdp.add_layout_image(
+                            dict(
+                                source=img_url,
+                                xref="x",
+                                yref="paper",
+                                xanchor="center",
+                                yanchor="bottom",
+                                x=row['state_full_name'],
+                                y=1.05, # Position the flag slightly above the plot area
+                                sizex=0.1,
+                                sizey=0.1,
+                                layer="above"
+                            )
+                        )
             
-            for i, val in enumerate(gdp_values):
-                # Laraskan kedudukan teks supaya tidak bertindih dengan bendera
-                ax.text(i, val + 15000, f"{val:,.2f}", ha='center', va='bottom', fontsize=6, color='black')
-            
-            # Tambah ruang kosong di bahagian atas paksi Y
-            ax.set_ylim(top=df_latest_year_sorted['gdp_total'].max() * 1.25)
-
-            ax.set_facecolor((1.0, 1.0, 1.0, 0.5))
-            fig.set_facecolor((1.0, 1.0, 1.0, 0.8))
-            st.pyplot(fig)
+            st.plotly_chart(fig_gdp, use_container_width=True)
 
         with col_pop:
             # === POPULATION CHART ===
@@ -361,13 +363,13 @@ with tab1:
             
                 df_sorted = df_wellbeing.sort_values(by='economic_wellbeing', ascending=False)
                 bar_chart = px.bar(df_sorted, x='economic_wellbeing', y='state', orientation='h',
-                                     color='economic_wellbeing', color_continuous_scale='Viridis',
-                                     labels={'economic_wellbeing': 'Index Score', 'state': 'State'},
-                                     text='economic_wellbeing', title="ECONOMIC WELLBEING INDEX BY STATE")
+                                    color='economic_wellbeing', color_continuous_scale='Viridis',
+                                    labels={'economic_wellbeing': 'Index Score', 'state': 'State'},
+                                    text='economic_wellbeing', title="ECONOMIC WELLBEING INDEX BY STATE")
                 bar_chart.update_traces(texttemplate='%{text:.2f}', textposition='outside')
                 bar_chart.update_layout(uniformtext_minsize=2, uniformtext_mode='hide', title_x=0.2,
-                                         margin=dict(l=150, r=100, t=50, b=20),
-                                         xaxis=dict(range=[0, df_wellbeing['economic_wellbeing'].max() * 1.3]))
+                                        margin=dict(l=150, r=100, t=50, b=20),
+                                        xaxis=dict(range=[0, df_wellbeing['economic_wellbeing'].max() * 1.3]))
                 st.plotly_chart(bar_chart, use_container_width=True)
 
                 st.markdown("""
@@ -393,20 +395,20 @@ with tab1:
             
             fig_lollipop = go.Figure()
             fig_lollipop.add_trace(go.Scatter(x=df_total_unemployed['state_full_name'], y=df_total_unemployed[unemployed_column_name],
-                                             mode='lines', line=dict(color='rgba(0,176,246,0.5)', width=3), hoverinfo='skip', showlegend=False))
+                                                mode='lines', line=dict(color='rgba(0,176,246,0.5)', width=3), hoverinfo='skip', showlegend=False))
             fig_lollipop.add_trace(go.Scatter(x=df_total_unemployed['state_full_name'], y=df_total_unemployed[unemployed_column_name],
-                                             mode='markers+text', marker=dict(size=15, color=df_total_unemployed[unemployed_column_name],
-                                             colorscale='Viridis', showscale=False, line=dict(color='white', width=3)),
-                                             text=df_total_unemployed[unemployed_column_name].apply(lambda x: f"{x:,.0f}"),
-                                             textposition='top center', textfont=dict(color='#2c3e50', size=12, family="Arial, sans-serif"),
-                                             hovertemplate="<b>%{x}</b><br>Total Unemployed: %{y:,.0f}<extra></extra>", showlegend=False))
+                                                mode='markers+text', marker=dict(size=15, color=df_total_unemployed[unemployed_column_name],
+                                                colorscale='Viridis', showscale=False, line=dict(color='white', width=3)),
+                                                text=df_total_unemployed[unemployed_column_name].apply(lambda x: f"{x:,.0f}"),
+                                                textposition='top center', textfont=dict(color='#2c3e50', size=12, family="Arial, sans-serif"),
+                                                hovertemplate="<b>%{x}</b><br>Total Unemployed: %{y:,.0f}<extra></extra>", showlegend=False))
             fig_lollipop.update_layout(title=dict(text="TOTAL UNEMPLOYED WORKFORCE", font=dict(size=14, color='black', family="Arial, sans-serif"), x=0.3),
-                                         xaxis=dict(title=dict(text='State', font=dict(size=14, color='#2c3e50')), tickangle=90, tickfont=dict(size=12, color='black'),
-                                             gridcolor='rgba(0,0,0,0.1)', linecolor='#2c3e50'),
-                                         yaxis=dict(title=dict(text='Total Unemployed (in Thousands)', font=dict(size=14, color='#2c3e50')),
-                                             tickfont=dict(size=12, color='#2c3e50'), gridcolor='rgba(0,0,0,0.1)', linecolor='#2c3e50'),
-                                         plot_bgcolor="rgba(255,255,255,0.9)", paper_bgcolor="rgba(255,255,255,0.9)",
-                                         height=450, font=dict(family="Arial, sans-serif", size=12), margin=dict(l=2, r=40, t=80, b=10))
+                                        xaxis=dict(title=dict(text='State', font=dict(size=14, color='#2c3e50')), tickangle=90, tickfont=dict(size=12, color='black'),
+                                            gridcolor='rgba(0,0,0,0.1)', linecolor='#2c3e50'),
+                                        yaxis=dict(title=dict(text='Total Unemployed (in Thousands)', font=dict(size=14, color='#2c3e50')),
+                                            tickfont=dict(size=12, color='#2c3e50'), gridcolor='rgba(0,0,0,0.1)', linecolor='#2c3e50'),
+                                        plot_bgcolor="rgba(255,255,255,0.9)", paper_bgcolor="rgba(255,255,255,0.9)",
+                                        height=450, font=dict(family="Arial, sans-serif", size=12), margin=dict(l=2, r=40, t=80, b=10))
             st.plotly_chart(fig_lollipop, use_container_width=True)
 
 
@@ -449,12 +451,12 @@ with tab2:
             title="Total GDP vs. Population (2022)",
             xaxis_title="State",
             yaxis=dict(
-                title=dict(text="Total GDP (RM Million)", font=dict(color="#4C72B0")),  
+                title=dict(text="Total GDP (RM Million)", font=dict(color="#4C72B0")), 
                 tickfont=dict(color="#4C72B0"),
                 tickformat=",.0f"
             ),
             yaxis2=dict(
-                title=dict(text="Population", font=dict(color="#E46E2B")),  
+                title=dict(text="Population", font=dict(color="#E46E2B")), 
                 tickfont=dict(color="#E46E2B"),
                 overlaying="y",
                 side="right",
@@ -566,6 +568,3 @@ with tab2:
             st.write(jawapan)
         else:
             st.warning("Please enter a question first.")
-
-
-
