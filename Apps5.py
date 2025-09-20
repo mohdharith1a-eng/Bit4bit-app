@@ -286,7 +286,7 @@ with tab1:
                     try:
                         # Buka dan ubah saiz imej
                         img = Image.open(flag_path)
-                        img.thumbnail((30, 30)) # Ubah saiz kepada 50x50 piksel
+                        img.thumbnail((28, 28)) # Ubah saiz kepada 50x50 piksel
                         
                         imagebox = OffsetImage(img, zoom=1.0) # Guna zoom 1.0 kerana sudah ubah saiz
                         
@@ -410,4 +410,5 @@ with tab1:
                                      plot_bgcolor="rgba(255,255,255,0.9)", paper_bgcolor="rgba(255,255,255,0.9)",
                                      height=450, font=dict(family="Arial, sans-serif", size=12), margin=dict(l=2, r=40, t=80, b=10))
             st.plotly_chart(fig_lollipop, use_container_width=True)
+
 
