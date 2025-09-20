@@ -21,30 +21,24 @@ st.set_page_config(layout="wide")
 
 
 # ================== CHARTBOT FUNCTION (Groq API) ==================
-GROQ_API_KEY = st.secrets["GROQ_API_KEY"]  # Correct key name
+# ... (rest of your code)
 
-def ask_groq(prompt):
-    """Sends a prompt to the Groq API and returns the chatbot response."""
-    try:
-        response = requests.post(
-            "https://api.groq.com/openai/v1/chat/completions",
-            headers={"Authorization": f"Bearer {GROQ_API_KEY}"},
-            json={
-                "model": "mixtral-8x7b-instruct",  # model free & laju
-                "messages": [{"role": "user", "content": prompt}],
-                "temperature": 0.7,
-                "max_tokens": 500
-            },
-            timeout=60
-        )
-        if response.status_code == 200:
-            data = response.json()
-            return data["choices"][0]["message"]["content"].strip()
+# ================== TAB 2: ECONOMIC COMPARISONS ==================
+# --- TAB 2: Comparisons & Solutions ---
+with tab2:
+    # ... (rest of the tab 2 code)
+
+    st.subheader("🤖 Bit4Bit Chatbot")
+    user_q = st.text_input("Ask a question (e.g., Johor's GDP trend 2022–2023)")
+    if st.button("Submit Question"):
+        if user_q.strip():
+            with st.spinner("Generating answer..."):
+                # Change the function call from ask_ollama to ask_groq
+                jawapan = ask_groq(user_q)
+            st.write("*Chartbot Answer:*")
+            st.write(jawapan)
         else:
-            return f"⚠ Groq API Error: {response.status_code} - {response.text}"
-    except Exception as e:
-        return f"⚠ Chatbot Error: {e}"
-
+            st.warning("Please enter a question first.")
 # ================== BACKGROUND IMAGE + GRADIENT ==================
 def add_bg_from_local(image_file):
     """Adds a local background image with a gradient overlay to the app."""
@@ -615,6 +609,7 @@ with tab2:
             st.write(jawapan)
         else:
             st.warning("Please enter a question first.")
+
 
 
 
