@@ -437,18 +437,6 @@ with tab1:
 
 
 
-# ================== SNAPSHOT DATA ==================
-# Right after loading your combined_df
-latest_year = combined_df["year"].max()
-df_snapshot = combined_df[combined_df["year"] == latest_year].copy()
-
-# Add readable names for states (use your state_names_dict if available)
-df_snapshot["state_full_name"] = df_snapshot["state"].apply(lambda s: state_names_dict.get(s, s))
-
-# Scale values for charts
-df_snapshot["total_gdp_billion"] = df_snapshot["gdp_total"] / 1e6    # convert to billion RM
-df_snapshot["population_million"] = df_snapshot["population"] / 1e6
-
 # ================== TAB 2: ECONOMIC COMPARISONS ==================
 with tab2:
     st.header("📊 Economic Comparisons")
