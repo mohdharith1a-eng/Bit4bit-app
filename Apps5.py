@@ -339,7 +339,7 @@ with tab1:
                 ),
                 showlegend=False,
                 plot_bgcolor="rgba(255,255,255,0.9)", paper_bgcolor="rgba(255,255,255,0.9)",
-                height=450, font=dict(family="Arial, sans-serif", size=12),
+                height=500, font=dict(family="Arial, sans-serif", size=12),
                 margin=dict(l=10, r=105, t=80, b=30)
             )
             st.plotly_chart(fig_pop, use_container_width=True)
@@ -566,3 +566,4 @@ with tab2:
             st.write(jawapan)
         else:
             st.warning("Please enter a question first.")
+
