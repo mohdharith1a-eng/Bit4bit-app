@@ -214,24 +214,24 @@ def get_state_names_dict():
     }
 
 def get_flags_dict():
-    base_url = "https://raw.githubusercontent.com/mohdharith1a-eng/Bit4bit-app/main/bendera/"
+    # --- KOD UNTUK MEMBACA FAIL TEMPATAN ---
     flags_dict = {
-        'JOHOR': f'{base_url}johor.png',
-        'KEDAH': f'{base_url}kedah.png',
-        'KELANTAN': f'{base_url}kelantan.png',
-        'W.P. LABUAN': f'{base_url}labuan.png',
-        'MELAKA': f'{base_url}melaka.png',
-        'NEGERI SEMBILAN': f'{base_url}n9.png',
-        'PAHANG': f'{base_url}pahang.png',
-        'PERAK': f'{base_url}perak.png',
-        'PERLIS': f'{base_url}perlis.png',
-        'PULAU PINANG': f'{base_url}penang.png',
-        'PUTRAJAYA': f'{base_url}putrajaya.png',
-        'SABAH': f'{base_url}sabah.png',
-        'SARAWAK': f'{base_url}sarawak.png',
-        'SELANGOR': f'{base_url}selangor.png',
-        'TERENGGANU': f'{base_url}terengganu.png',
-        'W.P. KUALA LUMPUR': f'{base_url}kuala_lumpur.png'
+        'JOHOR': 'bendera/johor.png',
+        'KEDAH': 'bendera/kedah.png',
+        'KELANTAN': 'bendera/kelantan.png',
+        'W.P. LABUAN': 'bendera/labuan.png',
+        'MELAKA': 'bendera/melaka.png',
+        'NEGERI SEMBILAN': 'bendera/n9.png',
+        'PAHANG': 'bendera/pahang.png',
+        'PERAK': 'bendera/perak.png',
+        'PERLIS': 'bendera/perlis.png',
+        'PULAU PINANG': 'bendera/penang.png',
+        'PUTRAJAYA': 'bendera/putrajaya.png',
+        'SABAH': 'bendera/sabah.png',
+        'SARAWAK': 'bendera/sarawak.png',
+        'SELANGOR': 'bendera/selangor.png',
+        'TERENGGANU': 'bendera/terengganu.png',
+        'W.P. KUALA LUMPUR': 'bendera/kuala_lumpur.png'
     }
     return flags_dict
 
@@ -282,11 +282,10 @@ with tab1:
             
             # --- KOD BARU UNTUK BENDERA ---
             for i, state in enumerate(df_latest_year_sorted['state']):
-                flag_url = flags_dict.get(state)
-                if flag_url:
+                flag_path = flags_dict.get(state)
+                if flag_path and os.path.exists(flag_path):
                     try:
-                        response = requests.get(flag_url)
-                        img = Image.open(io.BytesIO(response.content))
+                        img = Image.open(flag_path)
                         imagebox = OffsetImage(img, zoom=0.1) # Saiz bendera
                         ab = AnnotationBbox(imagebox, (i, gdp_values.iloc[i]), frameon=False, pad=0.1, box_alignment=(0.5, -0.6))
                         ax.add_artist(ab)
