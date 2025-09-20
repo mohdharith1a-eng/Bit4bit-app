@@ -604,91 +604,81 @@ with tab2:
             st.warning("Please enter a question first.")
 
 
-    elif comparison == "Total GDP vs. Unemployment Rate":
-        findings = "States with higher GDP often show more job opportunities, but in some cases, unemployment remains high despite large GDP values."
-        suggestions = "Diversify economic activities and enhance workforce training to reduce unemployment in high-GDP states."
-        
+        elif comparison == "Total GDP vs. Unemployment Rate":
+        findings = "Observe how states with high GDP may not necessarily have low unemployment. This highlights economic disparity."
+        suggestions = "Policies should focus on creating more job opportunities in high GDP states to balance economic prosperity."
         fig.add_trace(go.Bar(
             x=df_snapshot['state_full_name'],
             y=df_snapshot['gdp_total'],
             name='Total GDP (RM Million)',
-            marker_color='#4C72B0',
+            marker_color='#2C7BB6',
             offsetgroup=0
         ))
         fig.add_trace(go.Scatter(
             x=df_snapshot['state_full_name'],
             y=df_snapshot['unemployment_rate'],
             name='Unemployment Rate (%)',
+            yaxis='y2',
             mode='lines+markers',
-            marker=dict(color='#E46E2B', size=8),
-            line=dict(width=2, color='#E46E2B'),
-            yaxis='y2'
+            line=dict(color='#D7191C', width=2),
+            marker=dict(size=8)
         ))
         fig.update_layout(
             title="Total GDP vs. Unemployment Rate (2022)",
             xaxis_title="State",
             yaxis=dict(
-                title=dict(text="Total GDP (RM Million)", font=dict(color="#4C72B0")), 
-                tickfont=dict(color="#4C72B0"),
+                title=dict(text="Total GDP (RM Million)", font=dict(color="#2C7BB6")),
+                tickfont=dict(color="#2C7BB6"),
                 tickformat=",.0f"
             ),
             yaxis2=dict(
-                title=dict(text="Unemployment Rate (%)", font=dict(color="#E46E2B")), 
-                tickfont=dict(color="#E46E2B"),
+                title=dict(text="Unemployment Rate (%)", font=dict(color="#D7191C")),
+                tickfont=dict(color="#D7191C"),
                 overlaying="y",
-                side="right"
+                side="right",
+                tickformat=",.2f"
             )
         )
 
     elif comparison == "GDP per Capita vs. Unemployment Rate":
-        findings = "GDP per capita gives insight into wealth distribution. Some states with higher per capita GDP still face notable unemployment."
-        suggestions = "Strengthen social safety nets and encourage entrepreneurship to balance wealth with job creation."
-        
+        findings = "GDP per capita provides a clearer view of wealth distribution. Some states with high GDP still show high unemployment rates."
+        suggestions = "Focus on improving employability and skills training to balance income per capita with job availability."
         fig.add_trace(go.Bar(
             x=df_snapshot['state_full_name'],
             y=df_snapshot['gdp_per_capita'],
             name='GDP per Capita (RM)',
-            marker_color='#4C72B0',
+            marker_color='#1B9E77',
             offsetgroup=0
         ))
         fig.add_trace(go.Scatter(
             x=df_snapshot['state_full_name'],
             y=df_snapshot['unemployment_rate'],
             name='Unemployment Rate (%)',
+            yaxis='y2',
             mode='lines+markers',
-            marker=dict(color='#E46E2B', size=8),
-            line=dict(width=2, color='#E46E2B'),
-            yaxis='y2'
+            line=dict(color='#D95F02', width=2),
+            marker=dict(size=8)
         ))
         fig.update_layout(
             title="GDP per Capita vs. Unemployment Rate (2022)",
             xaxis_title="State",
             yaxis=dict(
-                title=dict(text="GDP per Capita (RM)", font=dict(color="#4C72B0")), 
-                tickfont=dict(color="#4C72B0"),
+                title=dict(text="GDP per Capita (RM)", font=dict(color="#1B9E77")),
+                tickfont=dict(color="#1B9E77"),
                 tickformat=",.0f"
             ),
             yaxis2=dict(
-                title=dict(text="Unemployment Rate (%)", font=dict(color="#E46E2B")), 
-                tickfont=dict(color="#E46E2B"),
+                title=dict(text="Unemployment Rate (%)", font=dict(color="#D95F02")),
+                tickfont=dict(color="#D95F02"),
                 overlaying="y",
-                side="right"
+                side="right",
+                tickformat=",.2f"
             )
         )
 
-    # Show chart
+    # Show chart and findings
     st.plotly_chart(fig, use_container_width=True)
+    st.markdown(f"### Findings:\n{findings}")
+    st.markdown(f"### Suggestions:\n{suggestions}")
 
-    # Show findings and suggestions inside translucent box
-    st.markdown(
-        f"""
-        <div class="translucent-box">
-            <h4>Findings:</h4>
-            <p>{findings}</p>
-            <h4>Suggestions:</h4>
-            <p>{suggestions}</p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
 
