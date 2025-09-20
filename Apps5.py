@@ -284,7 +284,7 @@ with tab1:
                 flag_path = flags_dict.get(state)
                 if flag_path and os.path.exists(flag_path):
                     try:
-                        img = Image.open(flag_path).resize((25, 28)) # Resize the image to 28x28
+                        img = Image.open(flag_path).resize((28, 25)) # Resize the image to 28x28
                         imagebox = OffsetImage(img, zoom=1) # Keep zoom at 1 after resizing
                         
                         # Laraskan kedudukan bendera di atas bar
@@ -566,4 +566,5 @@ with tab2:
             st.write(jawapan)
         else:
             st.warning("Please enter a question first.")
+
 
