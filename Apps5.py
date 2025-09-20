@@ -431,7 +431,24 @@ with tab1:
                                      height=450, font=dict(family="Arial, sans-serif", size=12), margin=dict(l=2, r=40, t=80, b=10))
             st.plotly_chart(fig_lollipop, use_container_width=True)
 
-# --- TAB 2: Comparisons & Solutions ---
+
+
+
+
+
+
+# ================== SNAPSHOT DATA ==================
+# Right after loading your combined_df
+latest_year = combined_df["year"].max()
+df_snapshot = combined_df[combined_df["year"] == latest_year].copy()
+
+# Add readable names for states (use your state_names_dict if available)
+df_snapshot["state_full_name"] = df_snapshot["state"].apply(lambda s: state_names_dict.get(s, s))
+
+# Scale values for charts
+df_snapshot["total_gdp_billion"] = df_snapshot["gdp_total"] / 1e6    # convert to billion RM
+df_snapshot["population_million"] = df_snapshot["population"] / 1e6
+
 # ================== TAB 2: ECONOMIC COMPARISONS ==================
 with tab2:
     st.header("📊 Economic Comparisons")
@@ -561,6 +578,7 @@ with tab2:
     st.write(findings)
     st.subheader("Suggestions")
     st.write(suggestions)
+
 
 
 
