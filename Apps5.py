@@ -358,7 +358,12 @@ with tab1:
         # --- SECOND ROW: WELLBEING & UNEMPLOYMENT ---
         col_wellbeing, col_unemp = st.columns(2)
 
-      with col_wellbeing:
+     # After (Corrected code)
+with col_wellbeing:
+    # Use the df_wellbeing dataframe directly, which is already cleaned and correctly named.
+    # The previous code was loading a separate, uncleaned version of the same data.
+    
+    # Check if df_wellbeing is valid and not empty
     if df_wellbeing.empty:
         st.warning("⚠️ Wellbeing data is not available.")
     else:
@@ -395,7 +400,6 @@ with tab1:
             st.metric(label="State with the Highest Index", value=f"{min_state_info['state']}", delta=f"{min_state_info['economic_wellbeing']:.2f}")
         with metrics_col2:
             st.metric(label="State with the Lowest Index", value=f"{max_state_info['state']}", delta=f"{max_state_info['economic_wellbeing']:.2f}", delta_color="inverse")
-
         
         with col_unemp:
             # 4. Visualization: Unemployment Lollipop Chart
@@ -575,6 +579,7 @@ with tab2:
     st.write(findings)
     st.subheader("Suggestions")
     st.write(suggestions)
+
 
 
 
