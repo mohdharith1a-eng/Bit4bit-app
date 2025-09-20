@@ -11,6 +11,7 @@ import requests
 import json
 import warnings
 import numpy as np
+from groq import Groq
 
 # Suppress warnings from pandas and other libraries for cleaner output
 warnings.filterwarnings('ignore')
@@ -22,11 +23,32 @@ st.set_page_config(layout="wide")
 
 # Placeholder for the chatbot function, as it was not defined in the provided code
 def ask_groq(query):
-    """
-    A placeholder function for the chatbot API call.
-    Replace with your actual implementation.
-    """
-    return "I am a placeholder chatbot. Please replace this function with your actual Groq or Ollama implementation."
+    try:
+        # Dapatkan kunci API dari secrets Streamlit
+        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+
+        # Hantar soalan pengguna ke API Groq
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant specialized in providing answers about Malaysian economic data based on provided charts and numbers. Be concise and to the point."
+                },
+                {
+                    "role": "user",
+                    "content": query,
+                }
+            ],
+            model="llama3-8b-8192",  # Boleh pilih model lain jika perlu
+        )
+
+        return chat_completion.choices[0].message.content
+    
+    except Exception as e:
+        # Beritahu pengguna jika berlaku ralat
+        return f"Maaf, ralat berlaku semasa berhubung dengan chatbot: {e}"
+
+# ... (rest of the Streamlit code)
 
 # ================== BACKGROUND IMAGE + GRADIENT ==================
 def add_bg_from_local(image_file):
@@ -509,3 +531,4 @@ with tab2:
             st.write(jawapan)
         else:
             st.warning("Please enter a question first.")
+
