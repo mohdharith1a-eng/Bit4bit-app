@@ -39,13 +39,14 @@ def ask_groq(query):
                     "content": query,
                 }
             ],
-            model="llama3-8b-8192",  # Boleh pilih model lain jika perlu
+            # --- GANTIKAN DENGAN NAMA MODEL YANG BAHARU ---
+            model="llama-3.1-8b-instant",
+            # ---------------------------------------------
         )
 
         return chat_completion.choices[0].message.content
     
     except Exception as e:
-        # Beritahu pengguna jika berlaku ralat
         return f"Maaf, ralat berlaku semasa berhubung dengan chatbot: {e}"
 
 # ... (rest of the Streamlit code)
@@ -531,6 +532,7 @@ with tab2:
             st.write(jawapan)
         else:
             st.warning("Please enter a question first.")
+
 
 
 
