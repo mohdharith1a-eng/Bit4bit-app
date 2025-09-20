@@ -352,7 +352,7 @@ with tab1:
             # ----------------------------------------------------------------------------------
             # --- ECONOMIC WELLBEING CHART ---
             DATA_PATH = os.path.join(os.path.dirname(__file__), 'datasets')
-            CSV_FILE = os.path.join(DATA_PATH, r"C:\Users\Acer\OneDrive\Desktop\Apps3\datasets\economic_wellbeing.csv")
+            CSV_FILE = os.path.join(DATA_PATH, r"https://github.com/mohdharith1a-eng/Bit4bit-app/blob/main/datasets/economic_wellbeing.csv")
 
             try:
                 df_data = pd.read_csv(CSV_FILE)
@@ -602,4 +602,5 @@ with tab2:
         else:
 
             st.warning("Please enter a question first.")
+
 
