@@ -276,7 +276,7 @@ with tab1:
             fig_gdp.update_layout(
                 title_x=0.2,
                 plot_bgcolor="rgba(255,255,255,0.9)",
-                paper_bgcolor="black",
+                paper_bgcolor="rgba(255,255,255,0.9)",
                 uniformtext_minsize=8, uniformtext_mode='hide'
             )
             
@@ -564,5 +564,6 @@ with tab2:
             st.write(jawapan)
         else:
             st.warning("Please type a question first.")
+
 
 
