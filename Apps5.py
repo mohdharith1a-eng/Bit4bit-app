@@ -20,30 +20,30 @@ px.defaults.template = "plotly_white"
 st.set_page_config(layout="wide")
 
 # ================== CHARTBOT FUNCTION ==================
-def ask_ollama(prompt):
-    """Sends a prompt to the Ollama API and returns the response."""
+# ================== CHARTBOT FUNCTION (Groq API) ==================
+GROQ_API_KEY = st.secrets["GROQ_API_KEY"]  # simpan key di Streamlit Secrets
+
+def ask_groq(prompt):
+    """Sends a prompt to the Groq API and returns the chatbot response."""
     try:
         response = requests.post(
-            "http://localhost:11434/api/generate",
-            json={"model": "llama3", "prompt": prompt},
-            stream=True,
-            timeout=120
+            "https://api.groq.com/openai/v1/chat/completions",
+            headers={"Authorization": f"Bearer {GROQ_API_KEY}"},
+            json={
+                "model": "mixtral-8x7b-instruct",  # model free & laju
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.7,
+                "max_tokens": 500
+            },
+            timeout=60
         )
         if response.status_code == 200:
-            output = ""
-            for line in response.iter_lines():
-                if line:
-                    try:
-                        obj = json.loads(line.decode("utf-8"))
-                        if "response" in obj:
-                            output += obj["response"]
-                    except:
-                        pass
-            return output.strip() if output else "❌ No answer from Chatbot."
+            data = response.json()
+            return data["choices"][0]["message"]["content"].strip()
         else:
-            return f"⚠️ Chartbot API Error: {response.status_code} - {response.text}"
+            return f"⚠ Groq API Error: {response.status_code} - {response.text}"
     except Exception as e:
-        return f"⚠️ Chartbot Error: {e}"
+        return f"⚠ Chatbot Error: {e}"
 
 # ================== BACKGROUND IMAGE + GRADIENT ==================
 def add_bg_from_local(image_file):
@@ -615,6 +615,7 @@ with tab2:
             st.write(jawapan)
         else:
             st.warning("Please enter a question first.")
+
 
 
 
