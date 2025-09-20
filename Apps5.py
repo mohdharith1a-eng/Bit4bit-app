@@ -20,9 +20,6 @@ px.defaults.template = "plotly_white"
 st.set_page_config(layout="wide")
 
 
-# ================== CHARTBOT FUNCTION (Groq API) ==================
-# ... (rest of your code)
-
 # ================== TAB 2: ECONOMIC COMPARISONS ==================
 # --- TAB 2: Comparisons & Solutions ---
 with tab2:
@@ -609,6 +606,7 @@ with tab2:
             st.write(jawapan)
         else:
             st.warning("Please enter a question first.")
+
 
 
 
