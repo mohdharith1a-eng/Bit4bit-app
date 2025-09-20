@@ -445,140 +445,177 @@ with col_wellbeing:
 
 
 # ================== TAB 2: ECONOMIC COMPARISONS ==================
+# --- TAB 2: Comparisons & Solutions ---
 with tab2:
-    st.header("📊 Economic Comparisons")
-
-    comparison = st.selectbox(
-        "Select comparison",
-        [
-            "GDP vs. Population",
-            "Total GDP vs. Unemployment Rate",
-            "GDP per Capita vs. Unemployment Rate"
-        ]
-    )
-
-    # Prepare data for comparison tab
+    # 4. Visualization: Dynamic Comparison Charts
+    # ----------------------------------------------------------------------------------
+    # 1. Data loading: Data is loaded from CSV files via load_all_data().
+    # 2. Data cleaning: Performed by clean_data() function during data loading.
+    # 3. Data pre-processing and Features:
+    #    - Filter the combined dataframe to focus on a specific year (2022).
+    #    - Fill any missing values with 0.
+    #    - Sort the data by state and map state codes to full names.
+    # 4. Visualization:
+    #    - A Plotly figure is created dynamically based on the user's selection from a Streamlit dropdown menu.
+    #    - Each comparison option generates a different combination chart (Bar + Line) to show the relationship between two variables.
+    #    - The findings and suggestions text is updated based on the selected comparison to provide contextual analysis.
+    # ----------------------------------------------------------------------------------
+    
     df_snapshot = combined_df[combined_df['year'] == 2022].copy()
-    df_snapshot['total_gdp_billion'] = df_snapshot['gdp_total'] / 1_000_000 # Convert to billions for better readability
-    df_snapshot['population_million'] = df_snapshot['population'] / 1_000 # Convert to millions
+    df_snapshot = df_snapshot.fillna(0)
+    df_snapshot = df_snapshot.sort_values(by='state')
     df_snapshot['state_full_name'] = df_snapshot['state'].apply(lambda s: state_names_dict.get(s, s))
 
-    # Prepare chart
+    comparison = st.selectbox("Select Comparison:", [
+        "Total GDP vs. Population",
+        "Total GDP vs. Unemployment Rate",
+        "GDP per Capita vs. Unemployment Rate"
+    ])
+    
+    findings = ""
+    suggestions = ""
     fig = go.Figure()
 
-    if comparison == "GDP vs. Population":
-        findings = "This chart compares the total GDP of each state against its population, showing how population size relates to economic output."
-        suggestions = "States with higher population but lower GDP may need strategies to boost productivity. Smaller states with high GDP show potential economic efficiency."
-
+    if comparison == "Total GDP vs. Population":
+        findings = "Note the relationship between population and GDP. States with larger populations typically contribute to higher GDP."
+        suggestions = "This shows great potential for these states to drive the nation's economic growth."
         fig.add_trace(go.Bar(
             x=df_snapshot['state_full_name'],
-            y=df_snapshot['total_gdp_billion'],
-            name='GDP (Billion RM)',
-            marker_color='#2980B9',
+            y=df_snapshot['gdp_total'],
+            name='Total GDP (RM Million)',
+            marker_color='#4C72B0',  # A professional, calming blue
             offsetgroup=0
         ))
-        fig.add_trace(go.Scatter(
+        fig.add_trace(go.Bar(
             x=df_snapshot['state_full_name'],
-            y=df_snapshot['population_million'],
-            name='Population (Million)',
-            mode='lines+markers',
-            marker=dict(color='#E67E22', size=8),
-            line=dict(color='#E67E22', width=2),
+            y=df_snapshot['population'],
+            name='Population',
+            marker_color='#E46E2B',  # A contrasting, warm orange/red
+            offsetgroup=1,
             yaxis='y2'
         ))
         fig.update_layout(
-            title="GDP vs. Population (2022)",
+            title="Total GDP vs. Population (2022)",
             xaxis_title="State",
             yaxis=dict(
-                title=dict(text="GDP (Billion RM)", font=dict(color="#2980B9")),
-                tickfont=dict(color="#2980B9")
+                title=dict(text="Total GDP (RM Million)", font=dict(color="#4C72B0")),  
+                tickfont=dict(color="#4C72B0"),
+                tickformat=",.0f"
             ),
             yaxis2=dict(
-                title=dict(text="Population (Million)", font=dict(color="#E67E22")),
-                tickfont=dict(color="#E67E22"),
+                title=dict(text="Population", font=dict(color="#E46E2B")),  
+                tickfont=dict(color="#E46E2B"),
                 overlaying="y",
-                side="right"
+                side="right",
+                tickformat=",.0f"
             )
         )
-
+            
     elif comparison == "Total GDP vs. Unemployment Rate":
-        findings = "This chart shows how each state's total GDP relates to unemployment rates. It highlights whether economic size translates into better employment opportunities."
-        suggestions = "Large GDP states with high unemployment may need more inclusive policies. Smaller GDP states with low unemployment can be models of efficiency."
+        findings = "This analysis shows whether a high GDP contributes to a lower unemployment rate."
+        suggestions = "While the trend is clear, other factors such as industry type and labor market need to be considered."
 
-        fig.add_trace(go.Bar(
+        # Line scatter chart for Total GDP
+        fig.add_trace(go.Scatter(
             x=df_snapshot['state_full_name'],
-            y=df_snapshot['total_gdp_billion'],
-            name='GDP (Billion RM)',
-            marker_color='#8E44AD',
-            offsetgroup=0
+            y=df_snapshot['gdp_total'],
+            name='Total GDP (RM Million)',
+            mode='lines+markers',
+            line=dict(color='#781fb4', width=4), # A deep purple line
+            marker=dict(color='#781fb4', size=8),
+            yaxis='y1'
         ))
+
+        # Line scatter chart for Unemployment Rate
         fig.add_trace(go.Scatter(
             x=df_snapshot['state_full_name'],
             y=df_snapshot['unemployment_rate'],
             name='Unemployment Rate (%)',
             mode='lines+markers',
-            marker=dict(color='#C0392B', size=8),
-            line=dict(color='#C0392B', width=2),
-            yaxis='y2'
+            yaxis='y2',
+            line=dict(color='#035720', width=4), # A dark green line
+            marker=dict(color='#035720', size=8)
         ))
+
         fig.update_layout(
             title="Total GDP vs. Unemployment Rate (2022)",
             xaxis_title="State",
             yaxis=dict(
-                title=dict(text="GDP (Billion RM)", font=dict(color="#8E44AD")),
-                tickfont=dict(color="#8E44AD"),
+                title=dict(text="Total GDP (RM Million)", font=dict(color="#781fb4")),
+                tickfont=dict(color="#781fb4"),
                 tickformat=",.0f"
             ),
             yaxis2=dict(
-                title=dict(text="Unemployment Rate (%)", font=dict(color="#C0392B")),
-                tickfont=dict(color="#C0392B"),
+                title=dict(text="Unemployment Rate (%)", font=dict(color="#035720")),
+                tickfont=dict(color="#035720"),
                 overlaying="y",
                 side="right"
             )
         )
-
     elif comparison == "GDP per Capita vs. Unemployment Rate":
-        findings = "This chart shows whether states with higher GDP per capita experience lower unemployment rates. It highlights economic well-being relative to population size and job creation."
-        suggestions = "Encourage states to leverage high GDP per capita into inclusive employment. For states with low GDP per capita but high unemployment, consider targeted development and job creation programs."
+        findings = "This comparison provides a more detailed picture of individual wellbeing and its connection to job opportunities."
+        suggestions = "Continuing to invest in high-tech and TVET sectors is important to maintain this trend."
 
-        fig.add_trace(go.Bar(
+        # Line scatter chart for GDP per Capita
+        fig.add_trace(go.Scatter(
             x=df_snapshot['state_full_name'],
             y=df_snapshot['gdp_per_capita'],
             name='GDP per Capita (RM)',
-            marker_color='#27AE60',
-            offsetgroup=0
+            mode='lines+markers',
+            line=dict(color='#33a02c', width=4), # A clear green line
+            marker=dict(color='#33a02c', size=8),
+            yaxis='y1'
         ))
+
+        # Line scatter chart for Unemployment Rate
         fig.add_trace(go.Scatter(
             x=df_snapshot['state_full_name'],
             y=df_snapshot['unemployment_rate'],
             name='Unemployment Rate (%)',
             mode='lines+markers',
-            marker=dict(color='#C0392B', size=8),
-            line=dict(color='#C0392B', width=2),
-            yaxis='y2'
+            yaxis='y2',
+            line=dict(color='#e31a1c', width=4), # A contrasting red line
+            marker=dict(color='#e31a1c', size=8)
         ))
+
         fig.update_layout(
             title="GDP per Capita vs. Unemployment Rate (2022)",
             xaxis_title="State",
             yaxis=dict(
-                title=dict(text="GDP per Capita (RM)", font=dict(color="#27AE60")),
-                tickfont=dict(color="#27AE60"),
+                title=dict(text="GDP per Capita (RM)", font=dict(color="#33a02c")),
+                tickfont=dict(color="#33a02c"),
                 tickformat=",.0f"
             ),
             yaxis2=dict(
-                title=dict(text="Unemployment Rate (%)", font=dict(color="#C0392B")),
-                tickfont=dict(color="#C0392B"),
+                title=dict(text="Unemployment Rate (%)", font=dict(color="#e31a1c")),
+                tickfont=dict(color="#e31a1c"),
                 overlaying="y",
                 side="right"
             )
         )
+    # Common layout updates for all comparison charts
+    fig.update_layout(
+        legend=dict(x=0, y=1.1, orientation="h"),
+        plot_bgcolor="rgba(255,255,255,0.9)", paper_bgcolor="rgba(255,255,255,0.9)",
+        margin=dict(l=40, r=40, t=80, b=120),
+        xaxis=dict(tickangle=-45, tickfont=dict(size=11, color='black'))
+    )
 
-    # Show chart and insights
+    st.markdown(f'<div class="translucent-box"><h4>📌 Findings</h4><p>{findings}</p></div>', unsafe_allow_html=True)
     st.plotly_chart(fig, use_container_width=True)
-    st.subheader("Findings")
-    st.write(findings)
-    st.subheader("Suggestions")
-    st.write(suggestions)
+    st.markdown(f'<div class="translucent-box"><h4>💡 Suggestions</h4><p>{suggestions}</p></div>', unsafe_allow_html=True)
+    
+    st.subheader("🤖 Bit4Bit Chatbot")
+    user_q = st.text_input("Ask a question (e.g., Johor's GDP trend 2022–2023)")
+    if st.button("Submit Question"):
+        if user_q.strip():
+            with st.spinner("Generating answer..."):
+                jawapan = ask_ollama(user_q)
+            st.write("*Chartbot Answer:*")
+            st.write(jawapan)
+        else:
+            st.warning("Please enter a question first.")
+
 
 
 
