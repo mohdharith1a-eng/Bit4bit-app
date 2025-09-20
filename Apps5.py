@@ -284,13 +284,13 @@ with tab1:
                 flag_path = flags_dict.get(state)
                 if flag_path and os.path.exists(flag_path):
                     try:
-                        img = Image.open(flag_path)
-                        imagebox = OffsetImage(img, zoom=0.1)
+                        img = Image.open(flag_path).resize((28, 28)) # Resize the image to 28x28
+                        imagebox = OffsetImage(img, zoom=1) # Keep zoom at 1 after resizing
                         
                         # Laraskan kedudukan bendera di atas bar
                         # Guna kedudukan y yang lebih tinggi untuk mengelakkan bertindih
                         ab = AnnotationBbox(imagebox, (i, gdp_values.iloc[i] + 70000), 
-                                            frameon=False, pad=0.1, box_alignment=(0.5, 0.0))
+                                             frameon=False, pad=0.1, box_alignment=(0.5, 0.0))
                         ax.add_artist(ab)
                     except Exception as e:
                         print(f"Error loading flag for {state}: {e}")
@@ -361,9 +361,9 @@ with tab1:
             
                 df_sorted = df_wellbeing.sort_values(by='economic_wellbeing', ascending=False)
                 bar_chart = px.bar(df_sorted, x='economic_wellbeing', y='state', orientation='h',
-                                 color='economic_wellbeing', color_continuous_scale='Viridis',
-                                 labels={'economic_wellbeing': 'Index Score', 'state': 'State'},
-                                 text='economic_wellbeing', title="ECONOMIC WELLBEING INDEX BY STATE")
+                                     color='economic_wellbeing', color_continuous_scale='Viridis',
+                                     labels={'economic_wellbeing': 'Index Score', 'state': 'State'},
+                                     text='economic_wellbeing', title="ECONOMIC WELLBEING INDEX BY STATE")
                 bar_chart.update_traces(texttemplate='%{text:.2f}', textposition='outside')
                 bar_chart.update_layout(uniformtext_minsize=2, uniformtext_mode='hide', title_x=0.2,
                                          margin=dict(l=150, r=100, t=50, b=20),
@@ -401,12 +401,12 @@ with tab1:
                                              textposition='top center', textfont=dict(color='#2c3e50', size=12, family="Arial, sans-serif"),
                                              hovertemplate="<b>%{x}</b><br>Total Unemployed: %{y:,.0f}<extra></extra>", showlegend=False))
             fig_lollipop.update_layout(title=dict(text="TOTAL UNEMPLOYED WORKFORCE", font=dict(size=14, color='black', family="Arial, sans-serif"), x=0.3),
-                                     xaxis=dict(title=dict(text='State', font=dict(size=14, color='#2c3e50')), tickangle=90, tickfont=dict(size=12, color='black'),
+                                         xaxis=dict(title=dict(text='State', font=dict(size=14, color='#2c3e50')), tickangle=90, tickfont=dict(size=12, color='black'),
                                              gridcolor='rgba(0,0,0,0.1)', linecolor='#2c3e50'),
-                                     yaxis=dict(title=dict(text='Total Unemployed (in Thousands)', font=dict(size=14, color='#2c3e50')),
+                                         yaxis=dict(title=dict(text='Total Unemployed (in Thousands)', font=dict(size=14, color='#2c3e50')),
                                              tickfont=dict(size=12, color='#2c3e50'), gridcolor='rgba(0,0,0,0.1)', linecolor='#2c3e50'),
-                                     plot_bgcolor="rgba(255,255,255,0.9)", paper_bgcolor="rgba(255,255,255,0.9)",
-                                     height=450, font=dict(family="Arial, sans-serif", size=12), margin=dict(l=2, r=40, t=80, b=10))
+                                         plot_bgcolor="rgba(255,255,255,0.9)", paper_bgcolor="rgba(255,255,255,0.9)",
+                                         height=450, font=dict(family="Arial, sans-serif", size=12), margin=dict(l=2, r=40, t=80, b=10))
             st.plotly_chart(fig_lollipop, use_container_width=True)
 
 
@@ -566,6 +566,3 @@ with tab2:
             st.write(jawapan)
         else:
             st.warning("Please enter a question first.")
-
-
-
