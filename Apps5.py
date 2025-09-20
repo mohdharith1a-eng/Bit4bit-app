@@ -358,60 +358,44 @@ with tab1:
         # --- SECOND ROW: WELLBEING & UNEMPLOYMENT ---
         col_wellbeing, col_unemp = st.columns(2)
 
-        with col_wellbeing:
-            # 4. Visualization: Economic Wellbeing Bar Chart and Metrics
-            # ----------------------------------------------------------------------------------
-            # 1. Data loading: The data is loaded from a specific CSV file.
-            # 2. Data cleaning: The clean_data() function is used to ensure data types are correct.
-            # 3. Data pre-processing and Features:
-            #    - The dataframe is sorted by the wellbeing_value in ascending order.
-            #    - Helper function get_min_max_states identifies the states with the highest and lowest scores.
-            # 4. Visualization:
-            #    - A Plotly horizontal bar chart is created to show the economic wellbeing index for each state.
-            #    - Streamlit st.metric is used to display the states with the highest and lowest index values for a quick overview.
-            # ----------------------------------------------------------------------------------
-            # --- ECONOMIC WELLBEING CHART ---
-            DATA_PATH = os.path.join(os.path.dirname(__file__), 'datasets')
-            CSV_FILE = os.path.join(DATA_PATH, r"https://github.com/mohdharith1a-eng/Bit4bit-app/blob/main/datasets/economic_wellbeing.csv")
+      with col_wellbeing:
+    if df_wellbeing.empty:
+        st.warning("⚠️ Wellbeing data is not available.")
+    else:
+        def get_min_max_states(data):
+            # Use the correct column name 'economic_wellbeing'
+            min_state = data.loc[data['economic_wellbeing'].idxmin()]
+            max_state = data.loc[data['economic_wellbeing'].idxmax()]
+            return min_state, max_state
 
-            try:
-                df_data = load_csv_safe(CSV_FILE, "Economic Wellbeing Data")
-            except Exception as e:
-                st.error("Error: Could not load the 'economic_wellbeing.csv' file.")
-                st.stop()
+        min_state_info, max_state_info = get_min_max_states(df_wellbeing)
+    
+        df_sorted = df_wellbeing.sort_values(by='economic_wellbeing', ascending=True)
+        bar_chart = px.bar(df_sorted, x='economic_wellbeing', y='state', orientation='h',
+                           color='economic_wellbeing', color_continuous_scale='Viridis',
+                           labels={'economic_wellbeing': 'Index Score', 'state': 'State'},
+                           text='economic_wellbeing', title="ECONOMIC WELLBEING INDEX BY STATE")
+        bar_chart.update_traces(texttemplate='%{text:.2f}', textposition='outside')
+        bar_chart.update_layout(uniformtext_minsize=2, uniformtext_mode='hide', title_x=0.2,
+                                 margin=dict(l=150, r=100, t=50, b=20),
+                                 xaxis=dict(range=[0, df_wellbeing['economic_wellbeing'].max() * 1.3]))
+        st.plotly_chart(bar_chart, use_container_width=True)
 
-            def get_min_max_states(data):
-                min_state = data.loc[data['wellbeing_value'].idxmin()]
-                max_state = data.loc[data['wellbeing_value'].idxmax()]
-                return min_state, max_state
+        # Metrics
+        st.markdown("""
+        <style>
+        div[data-testid="stMetricLabel"] > div { font-size: 12px; }
+        div[data-testid="stMetricValue"] { font-size: 20px; }
+        div[data-testid="stMetricDelta"] > div { font-size: 12px; }
+        </style>
+        """, unsafe_allow_html=True)
 
-            min_state_info, max_state_info = get_min_max_states(df_data)
+        metrics_col1, metrics_col2 = st.columns(2)
+        with metrics_col1:
+            st.metric(label="State with the Highest Index", value=f"{min_state_info['state']}", delta=f"{min_state_info['economic_wellbeing']:.2f}")
+        with metrics_col2:
+            st.metric(label="State with the Lowest Index", value=f"{max_state_info['state']}", delta=f"{max_state_info['economic_wellbeing']:.2f}", delta_color="inverse")
 
-            df_sorted = df_data.sort_values(by='wellbeing_value', ascending=True)
-            bar_chart = px.bar(df_sorted, x='wellbeing_value', y='State', orientation='h',
-                               color='wellbeing_value', color_continuous_scale='Viridis',
-                               labels={'wellbeing_value': 'Index Score', 'State': 'State'},
-                               text='wellbeing_value', title="ECONOMIC WELLBEING INDEX BY STATE")
-            bar_chart.update_traces(texttemplate='%{text:.2f}', textposition='outside')
-            bar_chart.update_layout(uniformtext_minsize=2, uniformtext_mode='hide', title_x=0.2,
-                                     margin=dict(l=150, r=100, t=50, b=20),
-                                     xaxis=dict(range=[0, df_data['wellbeing_value'].max() * 1.3]))
-            st.plotly_chart(bar_chart, use_container_width=True)
-
-            # Metrics
-            st.markdown("""
-            <style>
-            div[data-testid="stMetricLabel"] > div { font-size: 12px; }
-            div[data-testid="stMetricValue"] { font-size: 20px; }
-            div[data-testid="stMetricDelta"] > div { font-size: 12px; }
-            </style>
-            """, unsafe_allow_html=True)
-
-            metrics_col1, metrics_col2 = st.columns(2)
-            with metrics_col1:
-                st.metric(label="State with the Highest Index", value=f"{max_state_info['State']}", delta=f"{max_state_info['wellbeing_value']:.2f}")
-            with metrics_col2:
-                st.metric(label="State with the Lowest Index", value=f"{min_state_info['State']}", delta=f"{min_state_info['wellbeing_value']:.2f}", delta_color="inverse")
         
         with col_unemp:
             # 4. Visualization: Unemployment Lollipop Chart
@@ -591,5 +575,6 @@ with tab2:
     st.write(findings)
     st.subheader("Suggestions")
     st.write(suggestions)
+
 
 
