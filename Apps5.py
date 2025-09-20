@@ -214,24 +214,23 @@ def get_state_names_dict():
     }
 
 def get_flags_dict():
-    # --- KOD UNTUK MEMBACA FAIL TEMPATAN ---
     flags_dict = {
-        'JOHOR': 'bendera/JOHOR.png',
-        'KEDAH': 'bendera/KEDAH.png',
-        'KELANTAN': 'bendera/KELANTAN.png',
-        'W.P. LABUAN': 'bendera/W.P. LABUAN.png',
-        'MELAKA': 'bendera/MELAKA.png',
-        'NEGERI SEMBILAN': 'bendera/NEGERI SEMBILAN.png',
-        'PAHANG': 'bendera/PAHANG.png',
-        'PERAK': 'bendera/PERAK.png',
-        'PERLIS': 'bendera/PERLIS.png',
-        'PULAU PINANG': 'bendera/PULAU PINANG.png',
-        'PUTRAJAYA': 'bendera/PUTRAJAYA.png',
-        'SABAH': 'bendera/SABAH.png',
-        'SARAWAK': 'bendera/SARAWAK.png',
-        'SELANGOR': 'bendera/SELANGOR.png',
-        'TERENGGANU': 'bendera/TERENGGANU.png',
-        'W.P. KUALA LUMPUR': 'bendera/W.P. KUALA LUMPUR.png'
+        'JOHOR': 'bendera/johor.png',
+        'KEDAH': 'bendera/kedah.png',
+        'KELANTAN': 'bendera/kelantan.png',
+        'W.P. LABUAN': 'bendera/labuan.png',
+        'MELAKA': 'bendera/melaka.png',
+        'NEGERI SEMBILAN': 'bendera/n9.png',
+        'PAHANG': 'bendera/pahang.png',
+        'PERAK': 'bendera/perak.png',
+        'PERLIS': 'bendera/perlis.png',
+        'PULAU PINANG': 'bendera/penang.png',
+        'PUTRAJAYA': 'bendera/putrajaya.png',
+        'SABAH': 'bendera/sabah.png',
+        'SARAWAK': 'bendera/sarawak.png',
+        'SELANGOR': 'bendera/selangor.png',
+        'TERENGGANU': 'bendera/terengganu.png',
+        'W.P. KUALA LUMPUR': 'bendera/kuala_lumpur.png'
     }
     return flags_dict
 
@@ -263,8 +262,8 @@ with tab1:
             df_latest_year = df_latest_year.sort_values(by='gdp_total', ascending=False)
             
             fig, ax = plt.subplots(figsize=(10, 6.5))
-            fig.subplots_adjust(bottom=0.2)
-            
+            fig.subplots_adjust(bottom=0.2, top=0.9) # Menambah ruang di atas dan bawah
+
             df_latest_year_sorted = df_latest_year.sort_values(by='gdp_total', ascending=False)
             states = df_latest_year_sorted['state'].apply(lambda x: state_names_dict.get(x, x))
             gdp_values = df_latest_year_sorted['gdp_total']
@@ -280,21 +279,29 @@ with tab1:
             ax.set_xticks(range(len(states)))
             ax.set_xticklabels(states, rotation=90, fontsize=8)
             
-            # --- KOD BARU UNTUK BENDERA ---
+            # --- KOD BARU UNTUK BENDERA DAN TEKS ---
             for i, state in enumerate(df_latest_year_sorted['state']):
                 flag_path = flags_dict.get(state)
                 if flag_path and os.path.exists(flag_path):
                     try:
                         img = Image.open(flag_path)
-                        imagebox = OffsetImage(img, zoom=0.1) # Saiz bendera
-                        ab = AnnotationBbox(imagebox, (i, gdp_values.iloc[i]), frameon=False, pad=0.1, box_alignment=(0.5, -0.6))
+                        imagebox = OffsetImage(img, zoom=0.1)
+                        
+                        # Laraskan kedudukan bendera di atas bar
+                        # Guna kedudukan y yang lebih tinggi untuk mengelakkan bertindih
+                        ab = AnnotationBbox(imagebox, (i, gdp_values.iloc[i] + 70000), 
+                                            frameon=False, pad=0.1, box_alignment=(0.5, 0.0))
                         ax.add_artist(ab)
                     except Exception as e:
                         print(f"Error loading flag for {state}: {e}")
-                        
-            for i, val in enumerate(gdp_values):
-                ax.text(i, val, f"{val:,.2f}", ha='center', va='bottom', fontsize=6, color='black')
             
+            for i, val in enumerate(gdp_values):
+                # Laraskan kedudukan teks supaya tidak bertindih dengan bendera
+                ax.text(i, val + 15000, f"{val:,.2f}", ha='center', va='bottom', fontsize=6, color='black')
+            
+            # Tambah ruang kosong di bahagian atas paksi Y
+            ax.set_ylim(top=df_latest_year_sorted['gdp_total'].max() * 1.25)
+
             ax.set_facecolor((1.0, 1.0, 1.0, 0.5))
             fig.set_facecolor((1.0, 1.0, 1.0, 0.8))
             st.pyplot(fig)
@@ -559,4 +566,3 @@ with tab2:
             st.write(jawapan)
         else:
             st.warning("Please enter a question first.")
-
