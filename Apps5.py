@@ -215,24 +215,34 @@ def get_state_names_dict():
 
 def get_flags_dict():
     flags_dict = {
-       'JOHOR': 'bendera/JOHOR.png',
-        'KEDAH': 'bendera/KEDAH.png',
-        'KELANTAN': 'bendera/KELANTAN.png',
-        'W.P. LABUAN': 'bendera/W.P. LABUAN.png',
-        'MELAKA': 'bendera/MELAKA.png',
-        'NEGERI SEMBILAN': 'bendera/NEGERI SEMBILAN.png',
-        'PAHANG': 'bendera/PAHANG.png',
-        'PERAK': 'bendera/PERAK.png',
-        'PERLIS': 'bendera/PERLIS.png',
-        'PULAU PINANG': 'bendera/PULAU PINANG.png',
-        'PUTRAJAYA': 'bendera/PUTRAJAYA.png',
-        'SABAH': 'bendera/SABAH.png',
-        'SARAWAK': 'bendera/SARAWAK.png',
-        'SELANGOR': 'bendera/SELANGOR.png',
-        'TERENGGANU': 'bendera/TERENGGANU.png',
-        'W.P. KUALA LUMPUR': 'bendera/W.P. KUALA LUMPUR.png'
+        'JOHOR': 'bendera/johor.png',
+        'KEDAH': 'bendera/kedah.png',
+        'KELANTAN': 'bendera/kelantan.png',
+        'W.P. LABUAN': 'bendera/labuan.png',
+        'MELAKA': 'bendera/melaka.png',
+        'NEGERI SEMBILAN': 'bendera/n9.png',
+        'PAHANG': 'bendera/pahang.png',
+        'PERAK': 'bendera/perak.png',
+        'PERLIS': 'bendera/perlis.png',
+        'PULAU PINANG': 'bendera/penang.png',
+        'PUTRAJAYA': 'bendera/putrajaya.png',
+        'SABAH': 'bendera/sabah.png',
+        'SARAWAK': 'bendera/sarawak.png',
+        'SELANGOR': 'bendera/selangor.png',
+        'TERENGGANU': 'bendera/terengganu.png',
+        'W.P. KUALA LUMPUR': 'bendera/kuala_lumpur.png'
     }
     return flags_dict
+
+def get_img_as_base64(file_path):
+    try:
+        with open(file_path, "rb") as f:
+            img_bytes = f.read()
+            encoded_string = base64.b64encode(img_bytes).decode('utf-8')
+            return f"data:image/png;base64,{encoded_string}"
+    except FileNotFoundError:
+        return None
+
 
 # ================== STREAMLIT APP LAYOUT ==================
 st.title("📊 BRIDGING THE GDP-GPI GAP: MALAYSIAN ECONOMIC DASHBOARD")
@@ -255,58 +265,76 @@ with tab1:
         col_gdp, col_pop = st.columns(2)
 
         with col_gdp:
-            # === GDP CHART (Matplotlib) ===
+            # === GDP CHART (Plotly) ===
             most_recent_year = df_gdp['year'].max()
             df_latest_year = df_gdp[df_gdp['year'] == most_recent_year].copy()
-            df_latest_year['state'] = df_latest_year['state'].str.upper().replace({'SUPRA': 'PUTRAJAYA'})
+            df_latest_year['state_full_name'] = df_latest_year['state'].apply(lambda x: state_names_dict.get(x, x))
             df_latest_year = df_latest_year.sort_values(by='gdp_total', ascending=False)
             
-            fig, ax = plt.subplots(figsize=(10, 6.5))
-            fig.subplots_adjust(bottom=0.2, top=0.9) 
-
-            df_latest_year_sorted = df_latest_year.sort_values(by='gdp_total', ascending=False)
-            states = df_latest_year_sorted['state'].apply(lambda x: state_names_dict.get(x, x))
-            gdp_values = df_latest_year_sorted['gdp_total']
-
-            cmap = plt.cm.cool
-            norm = plt.Normalize(vmin=0, vmax=len(states))
-            bar_colors = [cmap(norm(i)) for i in range(len(states))]
-
-            ax.bar(states, gdp_values, color=bar_colors)
-            ax.set_ylabel('GDP (RM MILLION)')
-            ax.set_title(f'GROSS DOMESTIC PRODUCT IN {most_recent_year}')
+            # Create a list of colors for the bars
+            gdp_values = df_latest_year['gdp_total']
+            color_values = np.arange(len(gdp_values))
+            cmap = plt.cm.get_cmap('cool', len(gdp_values))
+            colors = [f'rgb({int(c[0]*255)}, {int(c[1]*255)}, {int(c[2]*255)})' for c in cmap(color_values)]
             
-            ax.set_xticks(range(len(states)))
-            ax.set_xticklabels(states, rotation=90, fontsize=8)
+            fig_gdp = go.Figure()
+
+            # Add the bar chart trace
+            fig_gdp.add_trace(go.Bar(
+                x=df_latest_year['state_full_name'],
+                y=gdp_values,
+                text=gdp_values.apply(lambda x: f"{x:,.2f}"),
+                textposition='outside',
+                marker_color=colors,
+                hovertemplate="<b>%{x}</b><br>GDP: %{y:,.2f} RM Million<extra></extra>"
+            ))
             
-            # --- KOD BARU UNTUK MENYESUAIKAN SAIZ BENDERA ---
-            for i, state in enumerate(df_latest_year_sorted['state']):
+            # Add state flags as layout images
+            for i, state in enumerate(df_latest_year['state']):
                 flag_path = flags_dict.get(state)
                 if flag_path and os.path.exists(flag_path):
                     try:
-                        # Buka dan ubah saiz imej
-                        img = Image.open(flag_path)
-                        img.thumbnail((28, 28)) # Ubah saiz kepada 50x50 piksel
-                        
-                        imagebox = OffsetImage(img, zoom=1.0) # Guna zoom 1.0 kerana sudah ubah saiz
-                        
-                        # Letak bendera di atas bar dengan ruang tambahan
-                        ab = AnnotationBbox(imagebox, (i, gdp_values.iloc[i] + 70000), 
-                                            frameon=False, pad=0.1, box_alignment=(0.5, 0.0))
-                        ax.add_artist(ab)
+                        encoded_flag = get_img_as_base64(flag_path)
+                        if encoded_flag:
+                            fig_gdp.add_layout_image(
+                                dict(
+                                    source=encoded_flag,
+                                    xref="x",
+                                    yref="y",
+                                    x=df_latest_year['state_full_name'].iloc[i],
+                                    y=gdp_values.iloc[i] + 70000, # Position the flag above the text
+                                    sizex=0.5, # Adjust size
+                                    sizey=0.5,
+                                    xanchor="center",
+                                    yanchor="middle"
+                                )
+                            )
                     except Exception as e:
-                        print(f"Error loading flag for {state}: {e}")
-            
-            for i, val in enumerate(gdp_values):
-                # Laraskan kedudukan teks supaya tidak bertindih dengan bendera
-                ax.text(i, val + 15000, f"{val:,.2f}", ha='center', va='bottom', fontsize=6, color='black')
-            
-            # Tambah ruang kosong di bahagian atas paksi Y
-            ax.set_ylim(top=df_latest_year_sorted['gdp_total'].max() * 1.25)
+                        print(f"Error processing flag for {state}: {e}")
 
-            ax.set_facecolor((1.0, 1.0, 1.0, 0.5))
-            fig.set_facecolor((1.0, 1.0, 1.0, 0.8))
-            st.pyplot(fig)
+            # Update layout for a cleaner look
+            fig_gdp.update_layout(
+                title=dict(text=f"GROSS DOMESTIC PRODUCT IN {most_recent_year}", font=dict(size=14, color='black'), x=0.5),
+                xaxis=dict(
+                    title_text="",
+                    tickangle=-45,
+                    tickfont=dict(size=11, color='black'),
+                    automargin=True
+                ),
+                yaxis=dict(
+                    title_text="GDP (RM MILLION)",
+                    tickformat=",.0f",
+                    tickfont=dict(size=11, color='black')
+                ),
+                plot_bgcolor="rgba(255,255,255,0.9)",
+                paper_bgcolor="rgba(255,255,255,0.9)",
+                height=450,
+                showlegend=False,
+                hovermode="x unified"
+            )
+
+            st.plotly_chart(fig_gdp, use_container_width=True)
+
 
         with col_pop:
             # === POPULATION CHART ===
@@ -410,5 +438,3 @@ with tab1:
                                      plot_bgcolor="rgba(255,255,255,0.9)", paper_bgcolor="rgba(255,255,255,0.9)",
                                      height=450, font=dict(family="Arial, sans-serif", size=12), margin=dict(l=2, r=40, t=80, b=10))
             st.plotly_chart(fig_lollipop, use_container_width=True)
-
-
