@@ -112,6 +112,19 @@ pop_path = r"https://github.com/mohdharith1a-eng/Bit4bit-app/blob/main/datasets/
 wellbeing_path = r"https://github.com/mohdharith1a-eng/Bit4bit-app/blob/main/datasets/economic_wellbeing.csv"
 flag_folder_path = r"C:\Users\Acer\OneDrive\Desktop\Apps3\bendera"
 
+def load_csv_safe(path, name=""):
+    try:
+        df = pd.read_csv(path, sep=None, engine="python", on_bad_lines="skip", encoding="utf-8")
+        print(f"✅ Loaded {name} ({path}) - shape: {df.shape}")
+        return df
+    except UnicodeDecodeError:
+        df = pd.read_csv(path, sep=None, engine="python", on_bad_lines="skip", encoding="latin1")
+        print(f"⚠ Fallback encoding for {name} ({path}) - shape: {df.shape}")
+        return df
+    except Exception as e:
+        print(f"❌ Error loading {name} ({path}): {e}")
+        return pd.DataFrame() # return empty df if failed
+
 def clean_data(df, date_cols=None, numeric_cols=None, fillna_val=0, upper_state=True):
     df = df.copy()
     
@@ -138,12 +151,12 @@ def load_all_data():
     dataframes = {}
     
     try:
-        dataframes['gdp'] = pd.read_csv(gdp_path)
-        dataframes['lfs'] = pd.read_csv(unemp_path)
-        dataframes['population'] = pd.read_csv(pop_path)
-        dataframes['economic_wellbeing'] = pd.read_csv(wellbeing_path, encoding='utf-8-sig')
-    except FileNotFoundError as e:
-        st.error(f"Error: One of the CSV files was not found. {e}")
+        dataframes['gdp'] = load_csv_safe(gdp_path, "GDP")
+        dataframes['lfs'] = load_csv_safe(unemp_path, "Unemployment")
+        dataframes['population'] = load_csv_safe(pop_path, "Population")
+        dataframes['economic_wellbeing'] = load_csv_safe(wellbeing_path, "Wellbeing")
+    except Exception as e:
+        st.error(f"Error loading CSV files: {e}")
         st.stop()
 
     gdp = clean_data(dataframes['gdp'], date_cols=["date"], numeric_cols=["value"])
@@ -224,14 +237,14 @@ with tab1:
         with col_gdp:
             # 4. Visualization: GDP Bar Chart with Flags
             # ----------------------------------------------------------------------------------
-            # 1. Data loading: Data is loaded from CSV files via `load_all_data()`.
-            # 2. Data cleaning: Performed by `clean_data()` function during data loading.
+            # 1. Data loading: Data is loaded from CSV files via load_all_data().
+            # 2. Data cleaning: Performed by clean_data() function during data loading.
             # 3. Data pre-processing and Features:
             #    - Filter the dataframe to include only the most recent year's data.
             #    - Sort the data by GDP in descending order for ranking.
             # 4. Visualization:
             #    - Create a Matplotlib bar chart to display the GDP of each state.
-            #    - Use `OffsetImage` and `AnnotationBbox` to add state flags at the bottom of each bar.
+            #    - Use OffsetImage and AnnotationBbox to add state flags at the bottom of each bar.
             #    - Label the y-axis with 'GDP (RM billion)' and set the title.
             #    - Add data labels on top of each bar for clarity.
             # ----------------------------------------------------------------------------------
@@ -285,8 +298,8 @@ with tab1:
         with col_pop:
             # 4. Visualization: Population Pie Chart
             # ----------------------------------------------------------------------------------
-            # 1. Data loading: Data is loaded from CSV files via `load_all_data()`.
-            # 2. Data cleaning: Performed by `clean_data()` function during data loading.
+            # 1. Data loading: Data is loaded from CSV files via load_all_data().
+            # 2. Data cleaning: Performed by clean_data() function during data loading.
             # 3. Data pre-processing and Features:
             #    - Sort the data by population in descending order.
             #    - Calculate the percentage of the total population for each state.
@@ -342,22 +355,22 @@ with tab1:
             # 4. Visualization: Economic Wellbeing Bar Chart and Metrics
             # ----------------------------------------------------------------------------------
             # 1. Data loading: The data is loaded from a specific CSV file.
-            # 2. Data cleaning: The `clean_data()` function is used to ensure data types are correct.
+            # 2. Data cleaning: The clean_data() function is used to ensure data types are correct.
             # 3. Data pre-processing and Features:
-            #    - The dataframe is sorted by the `wellbeing_value` in ascending order.
-            #    - Helper function `get_min_max_states` identifies the states with the highest and lowest scores.
+            #    - The dataframe is sorted by the wellbeing_value in ascending order.
+            #    - Helper function get_min_max_states identifies the states with the highest and lowest scores.
             # 4. Visualization:
             #    - A Plotly horizontal bar chart is created to show the economic wellbeing index for each state.
-            #    - Streamlit `st.metric` is used to display the states with the highest and lowest index values for a quick overview.
+            #    - Streamlit st.metric is used to display the states with the highest and lowest index values for a quick overview.
             # ----------------------------------------------------------------------------------
             # --- ECONOMIC WELLBEING CHART ---
             DATA_PATH = os.path.join(os.path.dirname(__file__), 'datasets')
             CSV_FILE = os.path.join(DATA_PATH, r"https://github.com/mohdharith1a-eng/Bit4bit-app/blob/main/datasets/economic_wellbeing.csv")
 
             try:
-                df_data = pd.read_csv(CSV_FILE)
-            except FileNotFoundError:
-                st.error("Error: The 'economic_wellbeing.csv' file was not found.")
+                df_data = load_csv_safe(CSV_FILE, "Economic Wellbeing Data")
+            except Exception as e:
+                st.error("Error: Could not load the 'economic_wellbeing.csv' file.")
                 st.stop()
 
             def get_min_max_states(data):
@@ -396,15 +409,14 @@ with tab1:
         with col_unemp:
             # 4. Visualization: Unemployment Lollipop Chart
             # ----------------------------------------------------------------------------------
-            # 1. Data loading: Data is loaded from CSV files via `load_all_data()`.
-            # 2. Data cleaning: Performed by `clean_data()` function during data loading.
+            # 1. Data loading: Data is loaded from CSV files via load_all_data().
+            # 2. Data cleaning: Performed by clean_data() function during data loading.
             # 3. Data pre-processing and Features:
-            #    - Filter the unemployment data for `sex == 'both'`.
+            #    - Filter the unemployment data for sex == 'both'.
             #    - Group by state and sum the unemployment numbers to get a total count.
             #    - Sort the data in descending order for a clear ranking.
             #    - Map the state codes to their full names.
-            # 4. Visualization:
-            #    - Create a Plotly 'lollipop' chart by combining a `Scatter` trace with `mode='lines'` for the vertical line and another `Scatter` trace with `mode='markers+text'` for the data points and labels.
+            #    - Create a Plotly 'lollipop' chart by combining a Scatter trace with mode='lines' for the vertical line and another Scatter trace with mode='markers+text' for the data points and labels.
             #    - This provides a clear and visually appealing representation of unemployment totals per state.
             # ----------------------------------------------------------------------------------
             # --- UNEMPLOYMENT CHART ---
@@ -449,6 +461,12 @@ with tab2:
             "GDP per Capita vs. Unemployment Rate"
         ]
     )
+
+    # Prepare data for comparison tab
+    df_snapshot = combined_df[combined_df['year'] == 2022].copy()
+    df_snapshot['total_gdp_billion'] = df_snapshot['gdp_total'] / 1_000_000 # Convert to billions for better readability
+    df_snapshot['population_million'] = df_snapshot['population'] / 1_000 # Convert to millions
+    df_snapshot['state_full_name'] = df_snapshot['state'].apply(lambda s: state_names_dict.get(s, s))
 
     # Prepare chart
     fig = go.Figure()
@@ -566,8 +584,3 @@ with tab2:
     st.write(findings)
     st.subheader("Suggestions")
     st.write(suggestions)
-
-
-
-
-
