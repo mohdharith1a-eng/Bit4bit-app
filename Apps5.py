@@ -11,7 +11,7 @@ import requests
 import json
 import warnings
 import numpy as np
-import Groq
+
 
 # Suppress warnings from pandas and other libraries for cleaner output
 warnings.filterwarnings('ignore')
@@ -531,5 +531,6 @@ with tab2:
             st.write(jawapan)
         else:
             st.warning("Please enter a question first.")
+
 
 
