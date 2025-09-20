@@ -604,3 +604,91 @@ with tab2:
             st.warning("Please enter a question first.")
 
 
+    elif comparison == "Total GDP vs. Unemployment Rate":
+        findings = "States with higher GDP often show more job opportunities, but in some cases, unemployment remains high despite large GDP values."
+        suggestions = "Diversify economic activities and enhance workforce training to reduce unemployment in high-GDP states."
+        
+        fig.add_trace(go.Bar(
+            x=df_snapshot['state_full_name'],
+            y=df_snapshot['gdp_total'],
+            name='Total GDP (RM Million)',
+            marker_color='#4C72B0',
+            offsetgroup=0
+        ))
+        fig.add_trace(go.Scatter(
+            x=df_snapshot['state_full_name'],
+            y=df_snapshot['unemployment_rate'],
+            name='Unemployment Rate (%)',
+            mode='lines+markers',
+            marker=dict(color='#E46E2B', size=8),
+            line=dict(width=2, color='#E46E2B'),
+            yaxis='y2'
+        ))
+        fig.update_layout(
+            title="Total GDP vs. Unemployment Rate (2022)",
+            xaxis_title="State",
+            yaxis=dict(
+                title=dict(text="Total GDP (RM Million)", font=dict(color="#4C72B0")), 
+                tickfont=dict(color="#4C72B0"),
+                tickformat=",.0f"
+            ),
+            yaxis2=dict(
+                title=dict(text="Unemployment Rate (%)", font=dict(color="#E46E2B")), 
+                tickfont=dict(color="#E46E2B"),
+                overlaying="y",
+                side="right"
+            )
+        )
+
+    elif comparison == "GDP per Capita vs. Unemployment Rate":
+        findings = "GDP per capita gives insight into wealth distribution. Some states with higher per capita GDP still face notable unemployment."
+        suggestions = "Strengthen social safety nets and encourage entrepreneurship to balance wealth with job creation."
+        
+        fig.add_trace(go.Bar(
+            x=df_snapshot['state_full_name'],
+            y=df_snapshot['gdp_per_capita'],
+            name='GDP per Capita (RM)',
+            marker_color='#4C72B0',
+            offsetgroup=0
+        ))
+        fig.add_trace(go.Scatter(
+            x=df_snapshot['state_full_name'],
+            y=df_snapshot['unemployment_rate'],
+            name='Unemployment Rate (%)',
+            mode='lines+markers',
+            marker=dict(color='#E46E2B', size=8),
+            line=dict(width=2, color='#E46E2B'),
+            yaxis='y2'
+        ))
+        fig.update_layout(
+            title="GDP per Capita vs. Unemployment Rate (2022)",
+            xaxis_title="State",
+            yaxis=dict(
+                title=dict(text="GDP per Capita (RM)", font=dict(color="#4C72B0")), 
+                tickfont=dict(color="#4C72B0"),
+                tickformat=",.0f"
+            ),
+            yaxis2=dict(
+                title=dict(text="Unemployment Rate (%)", font=dict(color="#E46E2B")), 
+                tickfont=dict(color="#E46E2B"),
+                overlaying="y",
+                side="right"
+            )
+        )
+
+    # Show chart
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Show findings and suggestions inside translucent box
+    st.markdown(
+        f"""
+        <div class="translucent-box">
+            <h4>Findings:</h4>
+            <p>{findings}</p>
+            <h4>Suggestions:</h4>
+            <p>{suggestions}</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
