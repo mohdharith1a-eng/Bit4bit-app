@@ -120,6 +120,7 @@ gdp_path = r"https://raw.githubusercontent.com/mohdharith1a-eng/Bit4bit-app/main
 unemp_path = r"https://raw.githubusercontent.com/mohdharith1a-eng/Bit4bit-app/main/datasets/unemployed.csv"
 pop_path = r"https://raw.githubusercontent.com/mohdharith1a-eng/Bit4bit-app/main/datasets/population_state.csv"
 wellbeing_path = r"https://raw.githubusercontent.com/mohdharith1a-eng/Bit4bit-app/main/datasets/economic_wellbeing.csv"
+flag_folder_path = r"C:\Users\Acer\OneDrive\Desktop\Apps3\bendera"
 
 def load_csv_safe(path, name=""):
     try:
@@ -532,6 +533,7 @@ with tab2:
             st.write(jawapan)
         else:
             st.warning("Please enter a question first.")
+
 
 
 
